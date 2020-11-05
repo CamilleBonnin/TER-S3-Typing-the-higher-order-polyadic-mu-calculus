@@ -183,3 +183,5 @@ let print_compute_variance (f : formula) : unit =
     | None -> "no variances needed"
   in 
   let () = print_string (s^"\n") in ()
+
+(*******)
