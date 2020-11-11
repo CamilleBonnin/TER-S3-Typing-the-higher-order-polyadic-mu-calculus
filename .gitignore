@@ -16,6 +16,8 @@
 *.tex
 *.thm
 *.bst
+*.gz
+*.bib
 
 # ocamlbuild working directory
 _build/
