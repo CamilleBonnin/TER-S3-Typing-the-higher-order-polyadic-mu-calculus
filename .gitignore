@@ -7,6 +7,15 @@
 *.cmx
 *.cmxs
 *.cmxa
+*.exe
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.log
+*.tex
+*.thm
+*.bst
 
 # ocamlbuild working directory
 _build/
