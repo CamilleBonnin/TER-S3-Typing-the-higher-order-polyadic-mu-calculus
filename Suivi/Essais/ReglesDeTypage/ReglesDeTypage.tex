@@ -12,6 +12,7 @@
 \usepackage{xcolor}
 \usepackage{mathpartir}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\newcommand{\avariance}{\upsilon}
 \title{Règles de typage du $\mu$-calcul }
 
 \begin{document}
@@ -68,7 +69,7 @@ $ $
 $ $
 \\
 $\inferrule 
-{\Gamma, X^{\varnothing} : \tau \vdash \Phi} 
+{\Gamma, X^{\avariance} : \tau \vdash \Phi} 
 {\Gamma \vdash \mu X : \tau \: . \: \Phi}
 \enspace X \notin vars(\Gamma)
 \qquad
@@ -81,67 +82,75 @@ $ $
 \\
 \Large {\textbf{Nouvelles règles}}\\
 
-On pose type(f) = ($\Gamma$, $\tau$) avec f, une formule écrite selon les règles du $\mu$-calcul, $\Gamma$, l'environnement de typage de f et $\tau$, le type de f.
+On pose $type(\Delta,f) = (\Gamma, \tau)$ avec f, une formule écrite selon les règles du $\mu$-calcul, $\Gamma$, l'environnement de typage de f et $\tau$, le type de f. $\Delta$ représente un environnement de typage incomplet, sans les variances des variables, par exemple $\Delta=(X:\bullet,Y:\bullet\to\bullet)$. Par la suite, on essaiera de se passer de $\Delta$...
+Enfin, on note $\mathsf{novariance}(\tau)$ le type $\tau$ dans lequel on a effacé toutes les variances.
 \\
 Dans la suite, $\emptyset$ représente l'environnement de typage vide.
-  
+
+On note $\avariance_1\wedge\avariance_2$ la variance ``inf'' des deux variances $\avariance_1$ et $\avariance_2$ au sens du
+treillis des variances. On note $\Gamma_1\wedge\Gamma_2$ l'environnement de typage tel que :
+\begin{itemize}
+\item si $X^{\avariance}:\tau$
+apparait dans $\Gamma_1$ et $X\not\in\mathsf{vars}(\Gamma_2)$, alors $X^{\avariance}:\tau$ apparait dans $\Gamma_1\wedge\Gamma_2$
+\item si $X^{\avariance}:\tau$
+apparait dans $\Gamma_2$ et $X\not\in\mathsf{vars}(\Gamma_1)$, alors $X^{\avariance}:\tau$ apparait dans $\Gamma_1\wedge\Gamma_2$
+\item si $X^{\avariance_1}:\tau_1$ apparait dans $\Gamma_1$ et $X^{\avariance_2}:\tau_2$ apparait dans $\Gamma_2$,
+alors (1) si $\tau_1\neq\tau_2$, $\Gamma_1\wedge\Gamma_2$ n'est pas défini, et (2) si $\tau_1=\tau_2$, alors
+$X^{\avariance_1\wedge\avariance_2}:\tau_1$ apparait dans $\Gamma_1\wedge\Gamma_2$.
+\end{itemize}
 \begin{center}
 $\inferrule 
 { } 
-{type(\top) = (\emptyset, \bullet)} 
+{type(\Delta, \top) = (\emptyset, \bullet)} 
 \qquad 
-\inferrule 
-{type(\Phi_{1}) = (\Gamma_{1}, \bullet) \\ type(\Phi_{2}) = (\Gamma_{2}, \bullet)} 
-{type(\Phi_{1} \wedge \Phi_{2}) = (\Gamma_{1} \cap \Gamma_{2}, \bullet)}\: ???$
+\inferrule
+{type(\Delta,\Phi_{1}) = (\Gamma_{1}, \bullet) \\ type(\Delta,\Phi_{2}) = (\Gamma_{2}, \bullet)} 
+{type(\Delta,\Phi_{1} \wedge \Phi_{2}) = (\Gamma_{1} \wedge \Gamma_{2}, \bullet)}$
 \\
 $ $
 \\
 $ $
 \\
 $\inferrule 
-{type(\Phi) = (\Gamma, \tau)} 
-{type(\neg\Phi) = (\overline{\{\sqcap, \sqcup\}} \circ \Gamma, \tau)}
+{type(\Delta,\Phi) = (\Gamma, \tau)} 
+{type(\Delta,\neg\Phi) = (\overline{\{\sqcap, \sqcup\}} \circ \Gamma, \tau)}
 \qquad
 \inferrule 
-{type(\Phi) = (\Gamma, \bullet)} 
-{type(\langle a \rangle_{i} \Phi) = (\{\sqcup\} \circ \Gamma, \bullet)}$
+{type(\Delta,\Phi) = (\Gamma, \bullet)} 
+{type(\Delta,\langle a \rangle_{i} \Phi) = (\{\sqcup\} \circ \Gamma, \bullet)}$
 \\
 $ $
 \\
 $ $
 \\
 $\inferrule 
-{type(\Phi) = (\Gamma, \bullet)} 
-{type(\{\vec{i} \leftarrow \vec{j}\} \Phi) = (\Gamma, \bullet)}
+{type(\Delta,\Phi) = (\Gamma, \bullet)} 
+{type(\Delta,\{\vec{i} \leftarrow \vec{j}\} \Phi) = (\Gamma, \bullet)}
 \qquad
 \inferrule 
-{\upsilon \subseteq \{\sqcap, \sqcup\}$ or $\upsilon = any}
-{type(X) = (\upsilon, \tau)}\: ???$
+{ (X:\tau)\in\Delta}
+{type(\Delta,X) = (X^{\{\sqcap,\sqcup\}}:\tau, \tau)}$
 \\
 $ $
 \\
 $ $
 \\
 $\inferrule 
-{\inferrule
-{type(e) = (\upsilon, \bullet)}
-{type(\mathfrak{F}) = (\Gamma_{1}, e \rightarrow \tau)} \\ type(\Phi) = (\Gamma_{2}, \bullet)}
-{type(\mathfrak{F} \Phi) = (\Gamma, \tau)}
-\: \enspace {}^{\Gamma \: \preceq \: \Gamma_{1}}_{\Gamma \: \preceq \: \upsilon \: \circ \: \Gamma_{2}} ???$
-\\
-$ $
-\\
-$ $
+{type(\Delta,\mathfrak{F}) = (\Gamma_{1}, \sigma^{\avariance} \rightarrow \tau) \\ type(\Delta,\Phi) = (\Gamma_{2}, \sigma)}
+{type(\Delta,\mathfrak{F} \Phi) = (\Gamma_1\wedge\avariance\circ\Gamma_2, \tau)}
+$ 
 \\
 $\inferrule 
-{\Gamma, X^{\varnothing} : \tau \vdash \Phi} 
-{\Gamma \vdash \mu X : \tau \: . \: \Phi}
-\enspace X \notin vars(\Gamma)
-\qquad
+{type(\Delta\cup\{X:\tau\},\Phi)=(\Gamma,\sigma)\\ \mathsf{novariance}(\sigma)=\tau
+\\ \Gamma=\Gamma'\cup\{X^{\avariance}:\sigma\} \\ \avariance \succeq \varnothing}
+{type(\Delta,\mu X : \tau \: . \: \Phi)=(\Gamma',\sigma)}
+$ 
+\\
+$
 \inferrule 
-{\Gamma, X^{\upsilon} : \bullet \vdash \Phi : \tau} 
-{\Gamma \vdash \lambda X^{\upsilon} : \bullet \: . \: \Phi : \bullet^{\upsilon} \rightarrow \tau}
-\enspace X \notin vars(\Gamma)$
+{type(\Delta\cup\{X:\sigma\},\Phi)=(\Gamma,\tau) \\ \Gamma=\Gamma'\cup\{X^{\avariance}: \sigma'\}} 
+{type(\Delta,\lambda X : \sigma \: . \: \Phi)= (\Gamma',\sigma'^{\avariance} \rightarrow \tau)}
+$
 \\
 $ $
 \end{center}

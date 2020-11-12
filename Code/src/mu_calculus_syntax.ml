@@ -19,8 +19,8 @@ type sugared_formula =
   | Box of var * (* * int for polyadic * *) sugared_formula
   | PreVariable of var
   | Mu of var * mu_type * sugared_formula (* smallest fix point *)
-  | Nu of var * mu_type * sugared_formula (* greatest fix point *) 
-  | Lambda of var * sugared_formula      (*for higher order*) 
+  | Nu of var * mu_type * sugared_formula (* greatest fix point *)
+  | Lambda of var * sugared_formula      (*for higher order*)
   | Application of sugared_formula * sugared_formula
 
 
@@ -31,11 +31,11 @@ type formula =
   | Diamond of var * (* * int for polyadic * *) formula
   | PreVariable of var
   | Mu of var * mu_type * formula (* smallest fix point *)
-  | Lambda of var  * formula      (*for higher order*) 
+  | Lambda of var  * formula      (*for higher order*)
   | Application of formula * formula
 
 let rec neg_var (phi : formula) (x : var) : formula =
-  match phi with 
+  match phi with
     | Top -> Top
     | And (phi, psi) -> And (neg_var phi x, neg_var psi x)
     | Neg (phi) -> Neg(neg_var phi x)
@@ -46,7 +46,7 @@ let rec neg_var (phi : formula) (x : var) : formula =
     | Application (phi,psi) -> Application(neg_var phi x, psi)
 
 let rec desugar (sf : sugared_formula) : formula =
-  match sf with 
+  match sf with
   | Top -> Top
   | Bottom -> Neg Top
   | And (phi, psi) -> And (desugar phi, desugar psi)
@@ -59,7 +59,7 @@ let rec desugar (sf : sugared_formula) : formula =
   | Nu (x,t,phi) -> Neg (Mu (x, t, Neg( neg_var (desugar phi) x)))
   | Lambda (x,phi) ->  Lambda (x, desugar phi)
   | Application (phi,psi) -> Application (desugar phi, desugar psi)
-    
+
 
 
 type type_assignment = {
@@ -76,7 +76,7 @@ type type_judgment = {
   phi : formula;
   tau : mu_type
 }
-  
+
 let rec t_to_string (tau : mu_type) : string =
   match tau with
     | Ground -> "Ground"
@@ -116,15 +116,15 @@ let  ta_to_string (ta : type_assignment) : string =
   f_to_string ta.phi ^" ^ "^ v_to_string ta.variance ^" : "^ t_to_string ta.tau
 
 
-let rec te_to_string (gamma : typing_environment) : string = 
-  match gamma with 
+let rec te_to_string (gamma : typing_environment) : string =
+  match gamma with
     | [] -> ""
     | ta::g -> ta_to_string ta ^ "\n" ^ te_to_string g
 
 (** Creer une liste des variables libres d'une formule **)
 
 (* Verifie si une variable x est dans une liste de variables lvar *)
-let rec is_in_list_var (lvar : var list) (x : var) : bool = 
+let rec is_in_list_var (lvar : var list) (x : var) : bool =
   match lvar with
     | [] -> false
     | v::rest -> if v = x then true else is_in_list_var rest x
@@ -135,7 +135,7 @@ let rec add_var_to_list (lvar : var list) (x : var) : var list =
   match (is_in_list_var lvar x) with
     | true -> lvar
     | false -> x::lvar
-    
+
 (* Utilitaire pour supprimer la variable x de la liste de variables lvar *)
 let rec util_supr_var_to_list (lvar : var list) (debut : var list) (x : var) : var list =
   match lvar with
@@ -197,4 +197,4 @@ let f_variables_not_free (phi : formula) : var list =
 let f_free_variables (phi : formula) : var list  =
   supr_list_from_list (f_variables phi) (f_variables_not_free phi)
 
-  
+let () = print_string (String.concat ";" (f_free_variables (Lambda ("x",PreVariable "x"))))  
