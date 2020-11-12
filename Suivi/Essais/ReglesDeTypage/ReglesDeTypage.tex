@@ -1,0 +1,151 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{ntheorem}
+\usepackage{xcolor}
+\usepackage{mathpartir}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\title{Règles de typage du $\mu$-calcul }
+
+\begin{document}
+
+\begin{center}
+  \Huge{\textbf{Règles de typage du $\mu$-calcul}}\\[1cm]
+\end{center}
+  
+\!\!\!\!\!\!\!\!\!\!\Large {\textbf{Règles actuelles  \cite{LANGE2014326}}}\\
+
+\begin{center}
+$\inferrule 
+{ } 
+{\Gamma \vdash \top $ : $\bullet} 
+\qquad 
+\inferrule 
+{\Gamma \vdash \Phi_{1} : \bullet \\ \Gamma \vdash \Phi_{2} : \bullet} 
+{\Gamma \vdash \Phi_{1} \wedge \Phi_{2} : \bullet}
+\qquad
+\inferrule 
+{\overline{\Gamma} \vdash \Phi : \tau} 
+{\Gamma \vdash \neg\Phi : \tau}$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{\Gamma \vdash \Phi : \bullet} 
+{\{\sqcup\} \circ \Gamma \vdash \langle a \rangle_{i} \Phi : \bullet}
+\qquad
+\inferrule 
+{\Gamma \vdash \Phi : \bullet} 
+{\Gamma \vdash \{\vec{i} \leftarrow \vec{j}\} \Phi : \bullet}
+\qquad
+\inferrule 
+{\upsilon \subseteq \{\sqcap, \sqcup\}$ or $\upsilon = any} 
+{\Gamma, X^{\upsilon} : \tau \vdash X : \tau}$
+\\
+$ $
+\\
+$ $
+\\
+$
+\inferrule 
+{\Gamma_{1} \vdash \mathfrak{F} : \bullet^{\upsilon} \rightarrow \tau \\
+\Gamma_{2} \vdash \Phi : \bullet} 
+{\Gamma \vdash \mathfrak{F} \Phi : \tau}
+\enspace {}^{\Gamma \: \preceq \: \Gamma_{1}}_{\Gamma \: \preceq \: \upsilon \: \circ \: \Gamma_{2}}
+$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{\Gamma, X^{\varnothing} : \tau \vdash \Phi} 
+{\Gamma \vdash \mu X : \tau \: . \: \Phi}
+\enspace X \notin vars(\Gamma)
+\qquad
+\inferrule 
+{\Gamma, X^{\upsilon} : \bullet \vdash \Phi : \tau} 
+{\Gamma \vdash \lambda X^{\upsilon} : \bullet \: . \: \Phi : \bullet^{\upsilon} \rightarrow \tau}
+\enspace X \notin vars(\Gamma)$
+\end{center}
+$ $
+\\
+\Large {\textbf{Nouvelles règles}}\\
+
+On pose type(f) = ($\Gamma$, $\tau$) avec f, une formule écrite selon les règles du $\mu$-calcul, $\Gamma$, l'environnement de typage de f et $\tau$, le type de f.
+\\
+Dans la suite, $\emptyset$ représente l'environnement de typage vide.
+  
+\begin{center}
+$\inferrule 
+{ } 
+{type(\top) = (\emptyset, \bullet)} 
+\qquad 
+\inferrule 
+{type(\Phi_{1}) = (\Gamma_{1}, \bullet) \\ type(\Phi_{2}) = (\Gamma_{2}, \bullet)} 
+{type(\Phi_{1} \wedge \Phi_{2}) = (\Gamma_{1} \cap \Gamma_{2}, \bullet)}\: ???$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{type(\Phi) = (\Gamma, \tau)} 
+{type(\neg\Phi) = (\overline{\{\sqcap, \sqcup\}} \circ \Gamma, \tau)}
+\qquad
+\inferrule 
+{type(\Phi) = (\Gamma, \bullet)} 
+{type(\langle a \rangle_{i} \Phi) = (\{\sqcup\} \circ \Gamma, \bullet)}$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{type(\Phi) = (\Gamma, \bullet)} 
+{type(\{\vec{i} \leftarrow \vec{j}\} \Phi) = (\Gamma, \bullet)}
+\qquad
+\inferrule 
+{\upsilon \subseteq \{\sqcap, \sqcup\}$ or $\upsilon = any}
+{type(X) = (\upsilon, \tau)}\: ???$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{\inferrule
+{type(e) = (\upsilon, \bullet)}
+{type(\mathfrak{F}) = (\Gamma_{1}, e \rightarrow \tau)} \\ type(\Phi) = (\Gamma_{2}, \bullet)}
+{type(\mathfrak{F} \Phi) = (\Gamma, \tau)}
+\: \enspace {}^{\Gamma \: \preceq \: \Gamma_{1}}_{\Gamma \: \preceq \: \upsilon \: \circ \: \Gamma_{2}} ???$
+\\
+$ $
+\\
+$ $
+\\
+$\inferrule 
+{\Gamma, X^{\varnothing} : \tau \vdash \Phi} 
+{\Gamma \vdash \mu X : \tau \: . \: \Phi}
+\enspace X \notin vars(\Gamma)
+\qquad
+\inferrule 
+{\Gamma, X^{\upsilon} : \bullet \vdash \Phi : \tau} 
+{\Gamma \vdash \lambda X^{\upsilon} : \bullet \: . \: \Phi : \bullet^{\upsilon} \rightarrow \tau}
+\enspace X \notin vars(\Gamma)$
+\\
+$ $
+\end{center}
+	
+\bibliographystyle{splncs04}
+\bibliography{TerS3}
+\end{document}
