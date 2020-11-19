@@ -62,37 +62,23 @@ val sf_to_string : sugared_formula -> string
 
 val f_to_string : formula -> string
 
-(** Creer une liste des variables libres d'une formule **)
+(** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
+d'occurences dans la formule. **)
 
-(* Verifie si une variable x est dans une liste de variables lvar *)
-val is_in_list_var : var list -> var -> bool
+(* Transforme une liste associative de vriables en chaine de caracteres*)
+val assoc_list_var_to_string : (var * int) list -> string
 
-(* Ajoute la variable x a la liste de variables lvar si elle n'y est pas deja *)
-val add_var_to_list : var list -> var -> var list
-    
-(* Utilitaire pour supprimer la variable x de la liste de variables lvar *)
-val util_supr_var_to_list : var list -> var list -> var -> var list 
-
-(* Supprime la variable x de la liste de variables lvar *)
-val supr_var_to_list : var list -> var -> var list
+(* Ajoute la variable x a la liste de variables associative lvar *)
+val add_var_to_list : (var * int) list -> var -> (var * int) list
 
 (* Fusionne les listes de variables lvar et lvar2 sans creer de doublons *)
-val concat_lists : var list -> var list -> var list 
+val concat_lists : (var * int) list -> (var * int) list -> (var * int) list
 
-(* Renvoie lvar sans les variables presentes dans la liste de variables supr *)
-val supr_list_from_list : var list -> var list -> var list 
+(* Enleve les elements de la liste de variables toRemove de la liste associative de variables lvar *)
+val remove_list : (var * int) list -> var list -> (var * int) list 
 
-(* Utilitaire pour renvoyer la liste des variables de la formule phi *)
-val rec_f_variables : formula -> var list -> var list 
+(* Utilitaire pour renvoyer la liste associative des variables libresde la formule phi *)
+val rec_f_free_variables : formula -> (var * int) list -> var list -> (var * int) list 
 
-(* Renvoie la liste des variables de la formule phi *)
-val f_variables : formula -> var list 
-
-(* Utilitaire pour renvoyer la liste des variables liees de la formule phi *)
-val rec_f_variables_not_free : formula -> var list -> var list
-
-(* Renvoie la liste des variables liees de la formule phi *)
-val f_variables_not_free : formula -> var list
-
-(* Renvoie la liste des variables libres de la formule phi *)
-val f_free_variables : formula -> var list
+(* Renvoie la liste associative des variables libres de la formule phi *)
+val f_free_variables : formula -> (var * int) list

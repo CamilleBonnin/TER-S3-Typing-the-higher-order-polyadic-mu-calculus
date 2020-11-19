@@ -121,80 +121,58 @@ let rec te_to_string (gamma : typing_environment) : string =
     | [] -> ""
     | ta::g -> ta_to_string ta ^ "\n" ^ te_to_string g
 
-(** Creer une liste des variables libres d'une formule **)
+(** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
+d'occurences dans la formule. **)
 
-(* Verifie si une variable x est dans une liste de variables lvar *)
-let rec is_in_list_var (lvar : var list) (x : var) : bool =
+(* Transforme une liste associative de vriables en chaine de caracteres*)
+let rec assoc_list_var_to_string (lvar : (var * int) list) : string =
   match lvar with
-    | [] -> false
-    | v::rest -> if v = x then true else is_in_list_var rest x
-    (*| v::rest -> is_in_list_var rest x*)
+    | [] -> ""
+    | (v, n)::rest -> "(" ^ v ^ ", " ^ string_of_int n ^ ") \n" ^ assoc_list_var_to_string rest
 
-(* Ajoute la variable x a la liste de variables lvar si elle n'y est pas deja *)
-let rec add_var_to_list (lvar : var list) (x : var) : var list =
-  match (is_in_list_var lvar x) with
-    | true -> lvar
-    | false -> x::lvar
-
-(* Utilitaire pour supprimer la variable x de la liste de variables lvar *)
-let rec util_supr_var_to_list (lvar : var list) (debut : var list) (x : var) : var list =
-  match lvar with
-    | [] -> List.rev debut
-    | v::rest -> if v = x then (List.rev debut) @ rest else util_supr_var_to_list rest (v::debut) x
-    (*| v::rest -> util_supr_var_to_list rest (v::debut) x *)
-
-(* Supprime la variable x de la liste de variables lvar *)
-let supr_var_to_list (lvar : var list) (x : var) : var list =
-  match (is_in_list_var lvar x) with
-    | false -> lvar
-    | true -> util_supr_var_to_list lvar [] x
+(* Ajoute la variable x a la liste de variables associative lvar *)
+let rec add_var_to_list (lvar : (var * int) list) (x : var) : (var * int) list =
+  match (List.mem_assoc x lvar) with
+    | true -> (x, ((List.assoc x lvar) + 1))::(List.remove_assoc x lvar)
+    | false -> (x, 1)::lvar
 
 (* Fusionne les listes de variables lvar et lvar2 sans creer de doublons *)
-let rec concat_lists (lvar : var list) (lvar2 : var list) : var list =
+let rec concat_lists (lvar : (var * int) list) (lvar2 : (var * int) list) : (var * int) list =
   match lvar with
     | [] -> lvar2
-    | v::rest -> concat_lists rest (add_var_to_list lvar2 v)
+    | (v, n)::rest -> match (List.mem_assoc v lvar2) with
+      | false -> (v, n)::(concat_lists rest lvar2)
+      | true -> (v, n + (List.assoc v lvar2))::(concat_lists rest (List.remove_assoc v lvar2))
 
-(* Renvoie lvar sans les variables presentes dans la liste de variables supr *)
-let rec supr_list_from_list (lvar : var list) (supr : var list) : var list =
-  match supr with
+(* Enleve les elements de la liste de variables toRemove de la liste associative de variables lvar *)
+let rec remove_list (lvar : (var * int) list) (toRemove : var list) : (var * int) list =
+  match toRemove with
   | [] -> lvar
-  | v::rest -> supr_list_from_list (supr_var_to_list lvar v) rest
+  | v::rest -> remove_list (List.remove_assoc v lvar) rest
 
-(* Utilitaire pour renvoyer la liste des variables de la formule phi *)
-let rec rec_f_variables (phi : formula) (lvar : var list) : var list =
+(* Utilitaire pour renvoyer la liste associative des variables libresde la formule phi *)
+let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove : var list) 
+  : (var * int) list =
   match phi with
-  | Top -> lvar
-  | And (phi2, psi) -> concat_lists (rec_f_variables phi2 lvar) (rec_f_variables psi lvar)
-  | Neg (phi2) -> rec_f_variables phi2 lvar
-  | Diamond (a, phi2) -> rec_f_variables phi2 lvar
-  | PreVariable (y) -> (y::lvar)
-  | Mu (y,tau,phi2) -> rec_f_variables phi2 (y::lvar)
-  | Lambda (y, phi2) -> rec_f_variables phi2 (y::lvar)
-  | Application (phi2,psi) -> concat_lists (rec_f_variables phi2 lvar) (rec_f_variables psi lvar)
+  | Top -> remove_list lvar toRemove
+  | And (phi2, psi) -> remove_list 
+                        (concat_lists (rec_f_free_variables phi2 lvar toRemove) 
+                                      (rec_f_free_variables psi lvar toRemove))
+                        toRemove
+  | Neg (phi2) -> remove_list (rec_f_free_variables phi2 lvar toRemove) toRemove
+  | Diamond (a, phi2) -> remove_list (rec_f_free_variables phi2 lvar toRemove) toRemove
+  | PreVariable (y) -> remove_list (add_var_to_list lvar y) toRemove
+  | Mu (y,tau,phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) toRemove
+  | Lambda (y, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) toRemove
+  | Application (phi2,psi) -> remove_list 
+                                (concat_lists (rec_f_free_variables phi2 lvar toRemove) 
+                                              (rec_f_free_variables psi lvar toRemove))
+                              toRemove
 
-(* Renvoie la liste des variables de la formule phi *)
-let f_variables (phi : formula) : var list =
-  rec_f_variables phi []
+(* Renvoie la liste associative des variables libres de la formule phi *)
+let f_free_variables (phi : formula) : (var * int) list =
+  rec_f_free_variables phi [] []
 
-(* Utilitaire pour renvoyer la liste des variables liees de la formule phi *)
-let rec rec_f_variables_not_free (phi : formula) (lvar : var list) : var list =
-  match phi with
-  | Top -> lvar
-  | And (phi2, psi) -> concat_lists (rec_f_variables_not_free phi2 lvar) (rec_f_variables_not_free psi lvar)
-  | Neg (phi2) -> rec_f_variables_not_free phi2 lvar
-  | Diamond (a, phi2) -> rec_f_variables_not_free phi2 lvar
-  | PreVariable (y) -> lvar
-  | Mu (y,tau,phi2) -> rec_f_variables_not_free phi2 (y::lvar)
-  | Lambda (y, phi2) -> rec_f_variables_not_free phi2 (y::lvar)
-  | Application (phi2,psi) -> concat_lists (rec_f_variables_not_free phi2 lvar) (rec_f_variables_not_free psi lvar)
-
-(* Renvoie la liste des variables liees de la formule phi *)
-let f_variables_not_free (phi : formula) : var list =
-  rec_f_variables_not_free phi []
-
-(* Renvoie la liste des variables libres de la formule phi *)
-let f_free_variables (phi : formula) : var list  =
-  supr_list_from_list (f_variables phi) (f_variables_not_free phi)
-
-let () = print_string (String.concat ";" (f_free_variables (Lambda ("x",PreVariable "x"))))  
+(* Test*)
+let () = print_string (assoc_list_var_to_string 
+  (f_free_variables (And((Lambda("x",PreVariable("x"))),PreVariable("x")))))
