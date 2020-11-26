@@ -163,7 +163,7 @@ let my_assig_to_string (assign : my_assignment) : string =
 (** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
 d'occurences dans la formule. **)
 
-(* Transforme une liste associative de vriables en chaine de caracteres *)
+(* Transforme une liste associative de variables en chaine de caracteres *)
 let rec assoc_list_var_to_string (lvar : (var * int) list) : string =
   match lvar with
     | [] -> ""
