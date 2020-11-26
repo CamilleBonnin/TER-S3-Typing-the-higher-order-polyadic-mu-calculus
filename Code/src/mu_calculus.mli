@@ -5,8 +5,6 @@ val smaller_environment  : typing_environment -> typing_environment -> bool
 
 val composition_environment : variance -> typing_environment -> typing_environment
 
-val print_infered_type : formula -> unit
-
 (* Utilitaire pour calculer l'environnement de typage complet gamma = gamma1 /\ gamma2 *)
 val util_G1_inter_G2 : complete_typing_environment -> complete_typing_environment -> complete_typing_environment -> complete_typing_environment
 

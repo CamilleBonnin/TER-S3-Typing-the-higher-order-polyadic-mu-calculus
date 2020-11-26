@@ -101,95 +101,6 @@ let rec not_e (gamma : typing_environment) : typing_environment =
     | [] -> []
     | ta::g -> {phi = ta.phi ; variance = not_v ta.variance; tau = ta.tau}::not_e g
 
-let rec type_inference (gamma : typing_environment) (input_formula : formula) : mu_type =
-  
-  let rec filter_gammas (gammas : typing_environment list ) (phi : formula) : mu_type =
-    match gammas with
-      | [] ->  Untypable
-      | gamma1 :: gamma_list -> let tau = type_inference gamma1 phi in 
-                               match tau with 
-                                  | Untypable ->  filter_gammas gamma_list phi
-                                  | _ ->  let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in tau (* we only care about finding any type for now *)
-    in
-  let rec filter_variances_lambda (vl : variance list) (gamma : typing_environment) (x : var) (phi : formula) : mu_type * variance = 
-    match vl with
-      | [] ->  (Untypable,None)
-      | v :: l -> let new_gamma = replace_type_assignment gamma {phi = PreVariable(x); variance = v; tau = Ground} in
-                  match type_inference new_gamma phi with 
-                    | Untypable -> filter_variances_lambda l gamma x phi
-                    | tau -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in (tau,v)
-  in 
-let rec filter_variances_mu (vl : variance list) (gamma : typing_environment) (f : var) (phi : formula)(arrt : mu_type) : mu_type * variance = 
-    match (vl,arrt) with
-      
-      | (v :: l),Arrow(tau1,_,tau2) -> (let new_gamma = replace_type_assignment gamma {phi = PreVariable(f); variance = v; tau = Arrow(tau1,v,tau2)} in
-                  match type_inference new_gamma phi with 
-                    | Untypable -> filter_variances_lambda l gamma f phi
-                    | tau -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in (tau,v))
-      | _,_ ->  (Untypable,None)
-
-    in
-    let rec filter_appl_pairs (pairs : (typing_environment * typing_environment) list) (f : formula) (phi : formula) : mu_type = 
-              match pairs with
-                 | [] -> Untypable
-                 | (gamma1,vgamma2) :: g -> let arrt = type_inference gamma1 f in 
-                                                match arrt with 
-                                                | Arrow (tau', v, tau) ->  let rec filter_gamma_twos (gammas : typing_environment list) : mu_type =
-                                                                                match gammas with 
-                                                                                    | [] -> filter_appl_pairs g f phi
-                                                                                    | gamma2::gl -> match (type_inference gamma2 phi) with
-                                                                                                       | tau'' when tau''==tau' -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in tau
-                                                                                                       | _ -> filter_gamma_twos gl
-                                                                            in
-                                                                            let gammatwos = inverse_environment v vgamma2 in
-                                                                            filter_gamma_twos gammatwos
-                                                | tau ->  filter_appl_pairs g f phi
-    in
-    match input_formula with
-      | Top -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in Ground
-      | Neg (phi) -> type_inference (not_e gamma) phi 
-      | Diamond (a, phi) -> filter_gammas (inverse_environment Meet gamma) phi 
-      | And (phi, psi) -> let tau1,tau2 = type_inference gamma phi, type_inference gamma psi in 
-                          (match (tau1,tau2) with 
-                            | Ground, Ground -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in Ground  
-                            | _,_ ->  Untypable ) (* there isn't a product type so there can't be a t1 * t2 type for instance, the only way to type the 'and' is if both have a ground type *)
-      | PreVariable (x) -> (match (get_variable_assignment gamma x) with
-                      | Some (ta)  -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in ta.tau
-                      | _ ->  Untypable) (* there shouldn't be any free variable at this point *)
-      | Mu (f, t, phi) -> (match (t, get_variable_assignment gamma f) with
-                              | _, Some(ta) ->  Untypable(* f should be a new transformer or a new predicate variable *)
-                              | Ground, _ -> let new_gamma = replace_type_assignment gamma {phi = PreVariable(f); variance = Monotone; tau = t} in type_inference new_gamma phi
-                              | Arrow(tau1,_,tau2), _ -> 
-                                  match (filter_variances_mu all_variances gamma f phi t) with
-                                        | Untypable,_ -> Untypable
-                                        | tau,v -> let new_gamma = replace_type_assignment gamma {phi = PreVariable(f); variance = Monotone; tau = Arrow(tau1,v,tau2)} in type_inference new_gamma phi )
-      | Lambda (x, phi) -> (match (get_variable_assignment gamma x) with
-                      | None -> (match (filter_variances_lambda all_variances gamma x phi) with 
-                                  | Untypable,_ -> Untypable
-                                  | tau,v -> let () = print_string ("phi : " ^(f_to_string input_formula)^"\ngamma : "^(te_to_string gamma)) in Arrow (Ground, v, tau))
-                      | _ -> Untypable ) (* x is supposed to be a new variable *)
-      | Application (f ,phi) -> 
-          let gammas = bigger_environments gamma in 
-          let gamma_pairs = permutation_pairs gammas gammas in (*contains all the pairs gamma1, vgamma2 st gamma <= gamma1 and gamma <= vgamma2 *)
-              filter_appl_pairs gamma_pairs f phi
-                                            
-
-(* gives an assignment to every free variable *)
-let rec decorate (f : formula) (varl : var list) : typing_environment =
-  match f with
-      | Top -> []
-      | And (phi, psi) -> let te1,te2 = decorate phi varl, decorate psi varl in te1@te2
-      | PreVariable (x) -> if (List.exists (fun e -> (String.equal e x)) varl) then
-                      [] else [{phi =  PreVariable (x); variance = Any; tau = Ground}]
-      | Mu (x, _, phi) | Lambda (x, phi) -> decorate phi (x::varl)
-      | Neg (phi) | Diamond (_, phi) | Application (_ ,phi) -> decorate phi varl
-
-
-let print_infered_type (f : formula) : unit =
-  let gamma_decorate = decorate f [] in 
-  let tau = type_inference gamma_decorate f in 
-  print_string ((t_to_string tau)^"\n")
-
 (* Utilitaire pour calculer l'environnement de typage complet gamma = gamma1 /\ gamma2 *)
 let rec util_G1_inter_G2 (gamma1 : complete_typing_environment) (gamma2 : complete_typing_environment) 
 (gamma : complete_typing_environment) : complete_typing_environment =
@@ -226,13 +137,11 @@ let rec typing (delta : incomplete_typing_environment) (f : formula) : my_assign
         | (gamma, Ground) -> ((rond Join gamma), Ground)
         | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case Diamond : " ^ (f_to_string psi) ^ " has not type Ground")
         | ( _, Arrow(_, _, _ )) -> failwith ("Error in typing with case Diamond : " ^ (f_to_string psi) ^ " has not type Ground"))
-    | And (psi, chi) -> (match (typing delta psi) with
-        | (gamma1, Ground) -> (match (typing delta chi) with
-            | (gamma2, Ground) -> ((typ_env_G1_inter_G2 gamma1 gamma2), Ground)
-            | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground")
-            | ( _, Arrow( _, _, _) ) -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground"))
-        | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case And : " ^ (f_to_string psi) ^ " has not type Ground")
-        | ( _, Arrow (_, _, _) ) -> failwith ("Error in typing with case And : " ^ (f_to_string psi) ^ " has not type Ground"))
+    | And (psi, chi) -> begin
+        match typing delta psi,typing delta chi with
+        | (gamma1, Ground),(gamma2, Ground) -> ((typ_env_G1_inter_G2 gamma1 gamma2), Ground)
+        | _ -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground")
+      end
     | Neg (psi) -> (match (typing delta psi) with
         | (gamma, tau) -> ((rond NAdditive gamma) ,tau))
     | PreVariable (x) -> (match (List.assoc_opt x delta) with
