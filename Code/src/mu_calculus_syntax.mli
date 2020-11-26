@@ -85,7 +85,7 @@ val my_assig_to_string : my_assignment -> string
 (** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
 d'occurences dans la formule. **)
 
-(* Transforme une liste associative de vriables en chaine de caracteres*)
+(* Transforme une liste associative de variables en chaine de caracteres*)
 val assoc_list_var_to_string : (var * int) list -> string
 
 (* Ajoute la variable x a la liste de variables associative lvar *)
