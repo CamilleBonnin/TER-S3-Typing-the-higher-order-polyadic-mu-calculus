@@ -60,7 +60,11 @@ let rec desugar (sf : sugared_formula) : formula =
   | Lambda (x,phi) ->  Lambda (x, desugar phi)
   | Application (phi,psi) -> Application (desugar phi, desugar psi)
 
+(* Représente un environnement de typage incomplet (delta). *)
+type incomplete_typing_environment = (var * mu_type) list
 
+(* Représente un environnement de typage complet (gamma). *)
+type complete_typing_environment = (var * (variance * mu_type)) list
 
 type type_assignment = {
   phi : formula;
@@ -76,6 +80,9 @@ type type_judgment = {
   phi : formula;
   tau : mu_type
 }
+
+(* Represente le resultat de type(delta, formule) *)
+type my_assignment = (complete_typing_environment * mu_type)
 
 let rec t_to_string (tau : mu_type) : string =
   match tau with
@@ -111,7 +118,6 @@ let rec f_to_string (phi : formula) : string =
     | Lambda (x, psi) -> "Lambda " ^ x ^ " : Ground ." ^ f_to_string psi
     | Application (f, psi) -> f_to_string f ^ f_to_string psi
 
-
 let  ta_to_string (ta : type_assignment) : string =
   f_to_string ta.phi ^" ^ "^ v_to_string ta.variance ^" : "^ t_to_string ta.tau
 
@@ -121,10 +127,43 @@ let rec te_to_string (gamma : typing_environment) : string =
     | [] -> ""
     | ta::g -> ta_to_string ta ^ "\n" ^ te_to_string g
 
+(* Verifie si deux types sont identiques *)
+let rec mu_type_equality (tau1 : mu_type) (tau2 : mu_type) : bool =
+  match tau1 with
+    | Ground -> (match tau2 with
+        | Ground -> true
+        | _ -> false)
+    | Arrow (t1, var ,t2) -> (match tau2 with
+        | Arrow (t3, var2 ,t4) -> (mu_type_equality t1 t3) && var == var2 && (mu_type_equality t2 t4)
+        | _ -> false)
+    | Parameter (str) -> (match tau2 with
+        | Parameter (str2) -> str == str2
+        | _ -> false)
+    | Untypable -> (match tau2 with
+        | Untypable -> true
+        | _ -> false)    
+
+(* Transforme un environnement de typage incomplet en chaine de caracteres *)
+let rec inc_typ_env_to_string (delta : incomplete_typing_environment) : string =
+  match delta with
+    | [] -> ""
+    | (v, t)::rest -> "(" ^ v ^ " : " ^ t_to_string t ^ ") \n" ^ inc_typ_env_to_string rest
+
+
+(* Transforme un environnement de typage complet en chaine de caracteres *)
+let rec comp_typ_env_to_string (gamma : complete_typing_environment) : string =
+  match gamma with
+    | [] -> ""
+    | (v, (va, tau))::rest -> "(" ^ v ^ " : (" ^ v_to_string va ^ ", " ^ t_to_string tau ^ ")) \n" ^ comp_typ_env_to_string rest
+
+(* Transforme un assignement en chaine de caracteres *)
+let my_assig_to_string (assign : my_assignment) : string =
+  "[ " ^ (comp_typ_env_to_string (fst assign)) ^ " type : " ^ (t_to_string (snd assign)) ^ " ]\n"
+
 (** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
 d'occurences dans la formule. **)
 
-(* Transforme une liste associative de vriables en chaine de caracteres*)
+(* Transforme une liste associative de vriables en chaine de caracteres *)
 let rec assoc_list_var_to_string (lvar : (var * int) list) : string =
   match lvar with
     | [] -> ""
@@ -154,20 +193,17 @@ let rec remove_list (lvar : (var * int) list) (toRemove : var list) : (var * int
 let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove : var list) 
   : (var * int) list =
   match phi with
-  | Top -> remove_list lvar toRemove
-  | And (phi2, psi) -> remove_list 
-                        (concat_lists (rec_f_free_variables phi2 lvar toRemove) 
-                                      (rec_f_free_variables psi lvar toRemove))
-                        toRemove
-  | Neg (phi2) -> remove_list (rec_f_free_variables phi2 lvar toRemove) toRemove
-  | Diamond (a, phi2) -> remove_list (rec_f_free_variables phi2 lvar toRemove) toRemove
-  | PreVariable (y) -> remove_list (add_var_to_list lvar y) toRemove
-  | Mu (y,tau,phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) toRemove
-  | Lambda (y, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) toRemove
-  | Application (phi2,psi) -> remove_list 
-                                (concat_lists (rec_f_free_variables phi2 lvar toRemove) 
-                                              (rec_f_free_variables psi lvar toRemove))
-                              toRemove
+  | Top -> lvar 
+  | And (phi2, psi) -> concat_lists (rec_f_free_variables phi2 lvar toRemove) 
+                                      (rec_f_free_variables psi lvar toRemove)
+                        
+  | Neg (phi2) -> rec_f_free_variables phi2 lvar toRemove
+  | Diamond (a, phi2) -> rec_f_free_variables phi2 lvar toRemove
+  | PreVariable (y) -> add_var_to_list lvar y
+  | Mu (y,tau,phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
+  | Lambda (y, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
+  | Application (phi2,psi) -> concat_lists (rec_f_free_variables phi2 lvar toRemove) 
+                                              (rec_f_free_variables psi lvar toRemove)
 
 (* Renvoie la liste associative des variables libres de la formule phi *)
 let f_free_variables (phi : formula) : (var * int) list =

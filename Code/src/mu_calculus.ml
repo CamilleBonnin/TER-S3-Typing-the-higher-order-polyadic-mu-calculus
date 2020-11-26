@@ -189,3 +189,70 @@ let print_infered_type (f : formula) : unit =
   let gamma_decorate = decorate f [] in 
   let tau = type_inference gamma_decorate f in 
   print_string ((t_to_string tau)^"\n")
+
+(* Utilitaire pour calculer l'environnement de typage complet gamma = gamma1 /\ gamma2 *)
+let rec util_G1_inter_G2 (gamma1 : complete_typing_environment) (gamma2 : complete_typing_environment) 
+(gamma : complete_typing_environment) : complete_typing_environment =
+  match gamma1 with
+    | [] -> gamma @ gamma2 (* Dans Gamma2 mais pas dans Gamma1 *)
+    | (v, (va, tau))::rest -> match List.assoc_opt v gamma2 with
+        | None -> util_G1_inter_G2 rest gamma2 ((v, (va, tau))::gamma) (* Dans Gamma1 mais pas dans Gamma2 *)
+        | Some (va2, tau2) -> if (mu_type_equality tau tau2)
+                          then util_G1_inter_G2 rest gamma2 ((v, ((inter va va2), tau))::gamma)
+                          else failwith ("Error in G1_inter_G2 : " ^ v ^ " has two different types " ^ (t_to_string tau) ^ " and " ^ (t_to_string tau2))
+
+(* Calcule l'environnement de typage complet gamma = gamma1 /\ gamma2 *)
+let typ_env_G1_inter_G2 (gamma1 : complete_typing_environment) (gamma2 : complete_typing_environment) 
+: complete_typing_environment =
+  util_G1_inter_G2 gamma1 gamma2 []
+
+(* Utilitaire pour realiser l'operation variance rond gamma *)
+let rec util_rond (var : variance) (gamma : complete_typing_environment) 
+(result : complete_typing_environment) : complete_typing_environment =
+  match gamma with 
+    | [] -> result
+    | (v, (va, tau))::rest -> util_rond var rest ((v, ((composition var va), tau))::result)
+
+(* Realiser l'operation variance rond gamma *)
+let rond (var : variance) (gamma : complete_typing_environment) : complete_typing_environment =
+  util_rond var gamma []
+
+(* Effecte le typage de f *)
+(* Il manque la regle {i <- j} *)
+let rec typing (delta : incomplete_typing_environment) (f : formula) : my_assignment =
+  match f with
+    | Top -> ([], Ground)
+    | Diamond (a, psi) -> (match (typing delta psi) with
+        | (gamma, Ground) -> ((rond Join gamma), Ground)
+        | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case Diamond : " ^ (f_to_string psi) ^ " has not type Ground")
+        | ( _, Arrow(_, _, _ )) -> failwith ("Error in typing with case Diamond : " ^ (f_to_string psi) ^ " has not type Ground"))
+    | And (psi, chi) -> (match (typing delta psi) with
+        | (gamma1, Ground) -> (match (typing delta chi) with
+            | (gamma2, Ground) -> ((typ_env_G1_inter_G2 gamma1 gamma2), Ground)
+            | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground")
+            | ( _, Arrow( _, _, _) ) -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground"))
+        | ( _, (Untypable|Parameter _)) -> failwith ("Error in typing with case And : " ^ (f_to_string psi) ^ " has not type Ground")
+        | ( _, Arrow (_, _, _) ) -> failwith ("Error in typing with case And : " ^ (f_to_string psi) ^ " has not type Ground"))
+    | Neg (psi) -> (match (typing delta psi) with
+        | (gamma, tau) -> ((rond NAdditive gamma) ,tau))
+    | PreVariable (x) -> (match (List.assoc_opt x delta) with
+        | None -> failwith ("Error in typing with case PreVariable : " ^ x ^ " is not in delta")
+        | Some (tau) -> ((List.cons (x, (Additive, tau)) []), tau))
+    | Mu (x, tau, psi) -> (match (typing ((x, tau)::delta) psi) with
+        | (gamma, omega) -> (match (mu_type_equality tau omega) with
+            | false -> failwith ("Error in typing with case Mu : error type tau")
+            | true -> (match (List.assoc_opt x gamma) with 
+                | None -> failwith ("Error in typing with case Mu : x not in gamma")
+                | Some (var, omega2) -> (match (mu_type_equality omega omega2) with
+                    | false -> failwith ("Error in typing with case Mu : error type omega2")
+                    | true -> (match (in_additive var) with 
+                        | false -> failwith ("Error in typing with case Mu : error variance not additive")
+                        | true -> ((List.remove_assoc x gamma), tau))))))
+    | Lambda (x, psi) -> failwith ("Error in typing with case Lambda : not done yet")
+    | Application (f, psi) -> (match (typing delta f) with
+        | (gamma1, Arrow (omega, var, tau)) -> (match (typing delta psi) with
+            | (gamma2, omega2) -> (match (mu_type_equality omega omega2) with
+                | false -> failwith ("Error in typing with case Application : no type compatibility")
+                | true -> ((typ_env_G1_inter_G2 gamma1 (rond var gamma2)) ,tau)))
+        | (_, (Ground|Untypable)) -> failwith ("Error in typing with case Application : " ^ (f_to_string f) ^ " has not type Arrow")
+        | (_, Parameter (_)) -> failwith ("Error in typing with case Application : " ^ (f_to_string f) ^ " has not type Arrow"))

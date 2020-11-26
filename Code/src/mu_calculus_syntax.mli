@@ -34,6 +34,11 @@ type formula =
   | Lambda of var * formula      (*for higher order*) 
   | Application of formula * formula
 
+(* Représente un environnement de typage incomplet (delta). *)
+type incomplete_typing_environment = (var * mu_type) list
+
+(* Représente un environnement de typage complet (gamma). *)
+type complete_typing_environment = (var * (variance * mu_type)) list
 
 type type_assignment = {
   phi : formula;
@@ -50,6 +55,9 @@ type type_judgment = {
   tau : mu_type
 }
 
+(* Represente le resultat de type(delta, formule) *)
+type my_assignment = (complete_typing_environment * mu_type)
+
 val neg_var : formula -> var -> formula
 
 val desugar : sugared_formula -> formula
@@ -61,6 +69,18 @@ val te_to_string : typing_environment -> string
 val sf_to_string : sugared_formula -> string
 
 val f_to_string : formula -> string
+
+(* Verifie si deux types sont identiques *)
+val mu_type_equality  : mu_type -> mu_type -> bool
+
+(* Transforme un environnement de typage incomplet en chaine de caracteres *)
+val inc_typ_env_to_string  : incomplete_typing_environment -> string
+
+(* Transforme un environnement de typage complet en chaine de caracteres *)
+val comp_typ_env_to_string : complete_typing_environment -> string
+
+(* Transforme un assignement en chaine de caracteres *)
+val my_assig_to_string : my_assignment -> string
 
 (** Creer une liste associative des variables libres d'une formule qui compte leur nombre 
 d'occurences dans la formule. **)
@@ -82,3 +102,4 @@ val rec_f_free_variables : formula -> (var * int) list -> var list -> (var * int
 
 (* Renvoie la liste associative des variables libres de la formule phi *)
 val f_free_variables : formula -> (var * int) list
+
