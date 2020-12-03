@@ -1,5 +1,4 @@
-type var = string
-
+(* Represente une variance *)
 type variance  =
   | None
   | Any
@@ -13,18 +12,11 @@ type variance  =
   | NMeet
   | NAdditive
 
-
-type variance_assignment = {
-  variable : var;
-  variance : variance
-  }
-
+(* Transforme une chaine de caractere en variance *)
 val variance_from_string : string -> variance
 
+(* Transforme une varaiance en chaine de caracteres *)
 val v_to_string : variance -> string
 
-val va_to_string : variance_assignment -> string
-
-val val_to_string : variance_assignment list -> string
-
+(* Fait la liste de toutes les variances *)
 val all_variances : variance list

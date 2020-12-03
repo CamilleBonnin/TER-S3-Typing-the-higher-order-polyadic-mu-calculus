@@ -1,14 +1,16 @@
 open Variance_syntax
 
-
+(* Represente une variable *)
 type var = string
 
+(* Represente un type (de base ou fleche), 
+le type Untypable peux etre utilise en interne *)
 type mu_type =
   | Ground
   | Arrow of mu_type * variance * mu_type
-  | Parameter of string
   | Untypable
 
+(* Represente une formule y compris les formules avec du sucre syntaxique *)
 type sugared_formula =
   | Top
   | Bottom
@@ -19,11 +21,11 @@ type sugared_formula =
   | Box of var * (* * int for polyadic * *) sugared_formula
   | PreVariable of var
   | Mu of var * mu_type * sugared_formula (* smallest fix point *)
-  | Nu of var * mu_type * sugared_formula (* greatest fix point *) 
-  | Lambda of var * sugared_formula      (*for higher order*) 
+  | Nu of var * mu_type * sugared_formula (* greatest fix point *)
+  | Lambda of var * mu_type * sugared_formula      (*for higher order*)
   | Application of sugared_formula * sugared_formula
 
-
+(* Represente une formule sans le sucre syntaxique *)
 type formula =
   | Top
   | And of formula * formula
@@ -31,47 +33,32 @@ type formula =
   | Diamond of var * (* * int for polyadic * *) formula
   | PreVariable of var
   | Mu of var * mu_type * formula (* smallest fix point *)
-  | Lambda of var * formula      (*for higher order*) 
+  | Lambda of var * mu_type * formula      (*for higher order*)
   | Application of formula * formula
-
-(* Représente un environnement de typage incomplet (delta). *)
+  
+(* Represente un environnement de typage incomplet (delta). *)
 type incomplete_typing_environment = (var * mu_type) list
 
-(* Représente un environnement de typage complet (gamma). *)
+(* Represente un environnement de typage complet (gamma). *)
 type complete_typing_environment = (var * (variance * mu_type)) list
-
-type type_assignment = {
-  phi : formula;
-  variance : variance;
-  tau : mu_type
-  }
-
-type typing_environment =
-  type_assignment list
-
-type type_judgment = {
-  gamma : typing_environment;
-  phi : formula;
-  tau : mu_type
-}
 
 (* Represente le resultat de type(delta, formule) *)
 type my_assignment = (complete_typing_environment * mu_type)
 
+(* Utilisee dans desugar *)
 val neg_var : formula -> var -> formula
 
+(* Enleve le sucre syntaxique d'une formule *)
 val desugar : sugared_formula -> formula
 
+(* Transforme un type en chaine de caracteres *)
 val t_to_string : mu_type -> string 
 
-val te_to_string : typing_environment -> string
-
+(* Transforme une formule avec sucre syntaxique en chaine de caracteres *)
 val sf_to_string : sugared_formula -> string
 
+(* Transforme une formule sans sucre syntaxique en chaine de caracteres *)
 val f_to_string : formula -> string
-
-(* Verifie si deux types sont identiques *)
-val mu_type_equality  : mu_type -> mu_type -> bool
 
 (* Transforme un environnement de typage incomplet en chaine de caracteres *)
 val inc_typ_env_to_string  : incomplete_typing_environment -> string

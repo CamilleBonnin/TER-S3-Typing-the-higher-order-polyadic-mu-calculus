@@ -1,14 +1,16 @@
 open Variance_syntax
 
-
+(* Represente une variable *)
 type var = string
 
+(* Represente un type (de base ou fleche), 
+le type Untypable peux etre utilise en interne *)
 type mu_type =
   | Ground
   | Arrow of mu_type * variance * mu_type
-  | Parameter of string
   | Untypable
 
+(* Represente une formule y compris les formules avec du sucre syntaxique *)
 type sugared_formula =
   | Top
   | Bottom
@@ -20,10 +22,10 @@ type sugared_formula =
   | PreVariable of var
   | Mu of var * mu_type * sugared_formula (* smallest fix point *)
   | Nu of var * mu_type * sugared_formula (* greatest fix point *)
-  | Lambda of var * sugared_formula      (*for higher order*)
+  | Lambda of var * mu_type * sugared_formula      (*for higher order*)
   | Application of sugared_formula * sugared_formula
 
-
+(* Represente une formule sans le sucre syntaxique *)
 type formula =
   | Top
   | And of formula * formula
@@ -31,9 +33,19 @@ type formula =
   | Diamond of var * (* * int for polyadic * *) formula
   | PreVariable of var
   | Mu of var * mu_type * formula (* smallest fix point *)
-  | Lambda of var  * formula      (*for higher order*)
+  | Lambda of var * mu_type * formula      (*for higher order*)
   | Application of formula * formula
 
+(* Represente un environnement de typage incomplet (delta). *)
+type incomplete_typing_environment = (var * mu_type) list
+
+(* Represente un environnement de typage complet (gamma). *)
+type complete_typing_environment = (var * (variance * mu_type)) list
+
+(* Represente le resultat de type(delta, formule) *)
+type my_assignment = (complete_typing_environment * mu_type)
+
+(* Utilisee dans desugar *)
 let rec neg_var (phi : formula) (x : var) : formula =
   match phi with
     | Top -> Top
@@ -42,9 +54,10 @@ let rec neg_var (phi : formula) (x : var) : formula =
     | Diamond (a, phi) -> Diamond (a, neg_var phi x)
     | PreVariable (y) ->  if (String.equal x y) then Neg(phi) else phi
     | Mu (y,tau,phi) -> Mu(y,tau,neg_var phi x)
-    | Lambda (y, phi) -> Lambda (y, neg_var phi x)
+    | Lambda (y, tau, phi) -> Lambda (y, tau, neg_var phi x)
     | Application (phi,psi) -> Application(neg_var phi x, psi)
 
+(* Enleve le sucre syntaxique d'une formule *)
 let rec desugar (sf : sugared_formula) : formula =
   match sf with
   | Top -> Top
@@ -57,41 +70,17 @@ let rec desugar (sf : sugared_formula) : formula =
   | PreVariable (x) -> PreVariable(x)
   | Mu (x,t,phi) -> Mu (x, t, desugar phi)
   | Nu (x,t,phi) -> Neg (Mu (x, t, Neg( neg_var (desugar phi) x)))
-  | Lambda (x,phi) ->  Lambda (x, desugar phi)
+  | Lambda (x, t, phi) ->  Lambda (x, t, desugar phi)
   | Application (phi,psi) -> Application (desugar phi, desugar psi)
 
-(* Représente un environnement de typage incomplet (delta). *)
-type incomplete_typing_environment = (var * mu_type) list
-
-(* Représente un environnement de typage complet (gamma). *)
-type complete_typing_environment = (var * (variance * mu_type)) list
-
-type type_assignment = {
-  phi : formula;
-  variance : variance;
-  tau : mu_type
-  }
-
-type typing_environment =
-  type_assignment list
-
-type type_judgment = {
-  gamma : typing_environment;
-  phi : formula;
-  tau : mu_type
-}
-
-(* Represente le resultat de type(delta, formule) *)
-type my_assignment = (complete_typing_environment * mu_type)
-
+(* Transforme un type en chaine de caracteres *)
 let rec t_to_string (tau : mu_type) : string =
   match tau with
     | Ground -> "Ground"
     | Arrow (tau1, v, tau2) -> t_to_string tau1 ^ " " ^ v_to_string v ^ " -> " ^ t_to_string tau2
-    | Parameter (s) -> s
     | Untypable -> "Untypable"
 
-
+(* Transforme une formule avec sucre syntaxique en chaine de caracteres *)
 let rec sf_to_string (phi : sugared_formula) : string =
   match phi with
     | Top -> "T"
@@ -104,9 +93,10 @@ let rec sf_to_string (phi : sugared_formula) : string =
     | PreVariable (x) -> x
     | Mu (f, tau, psi) -> "Mu "^ f ^":"^ t_to_string tau ^".("^ sf_to_string psi^")"
     | Nu (f, tau, psi) -> "Nu "^ f ^":"^ t_to_string tau ^"."^ sf_to_string psi
-    | Lambda (x, psi) -> "Lambda " ^ x  ^ " : Ground ." ^ sf_to_string psi
+    | Lambda (x, tau, psi) -> "Lambda " ^ x  ^":"^ t_to_string tau ^"."^ sf_to_string psi
     | Application (f, psi) -> sf_to_string f ^ sf_to_string psi
 
+(* Transforme une formule sans sucre syntaxique en chaine de caracteres *)
 let rec f_to_string (phi : formula) : string =
   match phi with
     | Top -> "T"
@@ -114,41 +104,15 @@ let rec f_to_string (phi : formula) : string =
     | And (psi, chi) -> f_to_string psi ^ " ^ " ^ f_to_string chi
     | Neg (psi) -> "!(" ^ f_to_string psi^")"
     | PreVariable (x) -> x
-    | Mu (f, tau, psi) -> "Mu "^ f ^":"^ t_to_string tau ^".("^ f_to_string psi^")"
-    | Lambda (x, psi) -> "Lambda " ^ x ^ " : Ground ." ^ f_to_string psi
-    | Application (f, psi) -> f_to_string f ^ f_to_string psi
-
-let  ta_to_string (ta : type_assignment) : string =
-  f_to_string ta.phi ^" ^ "^ v_to_string ta.variance ^" : "^ t_to_string ta.tau
-
-
-let rec te_to_string (gamma : typing_environment) : string =
-  match gamma with
-    | [] -> ""
-    | ta::g -> ta_to_string ta ^ "\n" ^ te_to_string g
-
-(* Verifie si deux types sont identiques *)
-let rec mu_type_equality (tau1 : mu_type) (tau2 : mu_type) : bool =
-  match tau1 with
-    | Ground -> (match tau2 with
-        | Ground -> true
-        | _ -> false)
-    | Arrow (t1, var ,t2) -> (match tau2 with
-        | Arrow (t3, var2 ,t4) -> (mu_type_equality t1 t3) && var == var2 && (mu_type_equality t2 t4)
-        | _ -> false)
-    | Parameter (str) -> (match tau2 with
-        | Parameter (str2) -> str == str2
-        | _ -> false)
-    | Untypable -> (match tau2 with
-        | Untypable -> true
-        | _ -> false)    
+    | Mu (f, tau, psi) -> "Mu "^ f ^":"^ t_to_string tau ^".("^ f_to_string psi ^")"
+    | Lambda (x, tau, psi) -> "Lambda " ^ x  ^":"^ t_to_string tau ^"."^ f_to_string psi
+    | Application (f, psi) -> f_to_string f ^ f_to_string psi  
 
 (* Transforme un environnement de typage incomplet en chaine de caracteres *)
 let rec inc_typ_env_to_string (delta : incomplete_typing_environment) : string =
   match delta with
     | [] -> ""
     | (v, t)::rest -> "(" ^ v ^ " : " ^ t_to_string t ^ ") \n" ^ inc_typ_env_to_string rest
-
 
 (* Transforme un environnement de typage complet en chaine de caracteres *)
 let rec comp_typ_env_to_string (gamma : complete_typing_environment) : string =
@@ -201,7 +165,7 @@ let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove
   | Diamond (a, phi2) -> rec_f_free_variables phi2 lvar toRemove
   | PreVariable (y) -> add_var_to_list lvar y
   | Mu (y,tau,phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
-  | Lambda (y, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
+  | Lambda (y, tau, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
   | Application (phi2,psi) -> concat_lists (rec_f_free_variables phi2 lvar toRemove) 
                                               (rec_f_free_variables psi lvar toRemove)
 
@@ -211,4 +175,4 @@ let f_free_variables (phi : formula) : (var * int) list =
 
 (* Test*)
 let () = print_string (assoc_list_var_to_string 
-  (f_free_variables (And((Lambda("x",PreVariable("x"))),PreVariable("x")))))
+  (f_free_variables (And((Lambda("x", Ground, PreVariable("x"))),PreVariable("x")))))

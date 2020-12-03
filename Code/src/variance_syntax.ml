@@ -1,5 +1,4 @@
-type var = string
-
+(* Represente une variance *)
 type variance  =
   | None
   | Any
@@ -13,12 +12,7 @@ type variance  =
   | NMeet
   | NAdditive
 
-
-type variance_assignment = {
-  variable : var;
-  variance : variance
-  }
-
+(* Transforme une chaine de caractere en variance *)
 let variance_from_string (s : string) : variance = 
   match s with 
     | s when (String.equal (String.lowercase_ascii s) "none") -> None
@@ -33,6 +27,7 @@ let variance_from_string (s : string) : variance =
     | s when (String.equal (String.lowercase_ascii s) "any") -> Any
     | _ -> failwith ("non-recognised input variance : "^s)
 
+(* Transforme une varaiance en chaine de caracteres *)
 let v_to_string (v : variance) : string = 
   match v with
     | None -> "None"
@@ -46,14 +41,6 @@ let v_to_string (v : variance) : string =
     | NMeet -> "NMeet"
     | NAdditive -> "NAdditive"
 
-
-let va_to_string (va : variance_assignment) : string =
-  va.variable^" : "^(v_to_string va.variance)
-
-let rec val_to_string (l : variance_assignment list) : string =
-   match l with
-    | [] -> ""
-    | va::l -> va_to_string va ^ "\n" ^ val_to_string l
-
+(* Fait la liste de toutes les variances *)
 let all_variances : variance list = 
   [None ;NAdditive; Additive; NJoin;Any ;NMeet; Join; Meet; Monotone; Antitone]
