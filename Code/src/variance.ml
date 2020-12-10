@@ -75,3 +75,4 @@ let greatest_smaller_variances  (v1 : variance) (v2 : variance) : variance =
 			| v::l when (smaller v v1) && (smaller v v2) -> v
 			| v::l -> test l
 	in test all_variances
+

@@ -77,7 +77,7 @@ let rec desugar (sf : sugared_formula) : formula =
 let rec t_to_string (tau : mu_type) : string =
   match tau with
     | Ground -> "Ground"
-    | Arrow (tau1, v, tau2) -> t_to_string tau1 ^ " " ^ v_to_string v ^ " -> " ^ t_to_string tau2
+    | Arrow (tau1, v, tau2) -> "(" ^ t_to_string tau1 ^ " " ^ v_to_string v ^ " -> " ^ t_to_string tau2 ^ ")"
     | Untypable -> "Untypable"
 
 (* Transforme une formule avec sucre syntaxique en chaine de caracteres *)
@@ -153,7 +153,7 @@ let rec remove_list (lvar : (var * int) list) (toRemove : var list) : (var * int
   | [] -> lvar
   | v::rest -> remove_list (List.remove_assoc v lvar) rest
 
-(* Utilitaire pour renvoyer la liste associative des variables libresde la formule phi *)
+(* Utilitaire pour renvoyer la liste associative des variables libres de la formule phi *)
 let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove : var list) 
   : (var * int) list =
   match phi with
@@ -173,6 +173,8 @@ let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove
 let f_free_variables (phi : formula) : (var * int) list =
   rec_f_free_variables phi [] []
 
+(*
 (* Test*)
 let () = print_string (assoc_list_var_to_string 
   (f_free_variables (And((Lambda("x", Ground, PreVariable("x"))),PreVariable("x")))))
+*)

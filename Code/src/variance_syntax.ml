@@ -43,4 +43,4 @@ let v_to_string (v : variance) : string =
 
 (* Fait la liste de toutes les variances *)
 let all_variances : variance list = 
-  [None ;NAdditive; Additive; NJoin;Any ;NMeet; Join; Meet; Monotone; Antitone]
+  [None ;NAdditive; Additive; NJoin; NMeet; Join; Meet; Monotone; Antitone; Any]

@@ -40,9 +40,13 @@ let rec typing (delta : incomplete_typing_environment) (f : formula) : my_assign
         | _ -> failwith ("Error in typing with case Diamond : " ^ (f_to_string psi) ^ " has not type Ground")
       end
     | And (psi, chi) -> begin
-      match (typing delta psi), (typing delta chi) with
-        | (gamma1, Ground),(gamma2, Ground) -> ((typ_env_G1_inter_G2 gamma1 gamma2), Ground)
-        | _ -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground")
+      match (typing delta psi) with
+        | (gamma1, Ground) -> begin
+          match (typing delta chi) with 
+            | (gamma2, Ground) -> ((typ_env_G1_inter_G2 gamma1 gamma2), Ground)
+            | _ -> failwith ("Error in typing with case And : " ^ (f_to_string chi) ^ " has not type Ground")
+        end
+        | _ -> failwith ("Error in typing with case And : " ^ (f_to_string psi) ^ " has not type Ground")
       end
     | Neg (psi) -> begin 
       match (typing delta psi) with
@@ -66,7 +70,7 @@ let rec typing (delta : incomplete_typing_environment) (f : formula) : my_assign
                     | false -> failwith ("Error in typing with case Mu : error type omega2")
                     | true -> begin
                       match (in_additive var) with 
-                        | false -> failwith ("Error in typing with case Mu : error variance not additive")
+                        | false -> failwith ("Error in typing with case Mu : error variance of " ^ (f_to_string psi) ^ " not additive but " ^ (v_to_string var))
                         | true -> ((List.remove_assoc x gamma), tau)
                       end
                   end
@@ -86,11 +90,205 @@ let rec typing (delta : incomplete_typing_environment) (f : formula) : my_assign
         | (gamma1, Arrow (omega, var, tau)), (gamma2, omega2) -> begin 
           match (omega = omega2) with
             | false -> failwith ("Error in typing with case Application : no type compatibility")
-            | true -> ((typ_env_G1_inter_G2 gamma1 (rond var gamma2)) ,tau)
+            | true -> ((typ_env_G1_inter_G2 gamma1 (rond var gamma2)) ,tau) 
           end
         | _ -> failwith ("Error in typing with case Application : " ^ (f_to_string f) ^ " has not type Arrow")
       end
 
-(* Test*)
+(*
+(* Test Top *)
 let () = print_string (my_assig_to_string 
-  (typing (("x", Ground)::[]) (And((Lambda("x", Ground, PreVariable("x"))),PreVariable("x")))))
+  (typing [] Top))
+*)
+
+(*
+(* Test Prevariable Ground *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Ground)::[]) (PreVariable("x"))))
+*)
+
+(*
+(* Test Prevariable Arrow *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::[]) (PreVariable("x"))))
+*)
+
+(*
+(* Test Diamond Ok *)
+let () = print_string (my_assig_to_string 
+  (typing (("x", Ground)::[]) (Diamond ("a", PreVariable("x")))))
+*)
+
+(*
+(* Test Diamond erreur *)
+let () = print_string (my_assig_to_string 
+  (typing (("x", Arrow(Ground,Any,Ground))::[]) (Diamond ("a", PreVariable("x")))))
+*)
+
+(*
+(* Test And Ok *)
+let () = print_string (my_assig_to_string 
+  (typing (("x", Ground)::("y", Ground)::[]) (And(PreVariable("y"),PreVariable("x")))))
+*)
+
+(*
+(* Test And erreur1 *)
+let () = print_string (my_assig_to_string 
+  (typing (("x", Arrow(Ground,Any,Ground))::("y", Ground)::[]) (And(PreVariable("x"),PreVariable("y")))))
+*)
+
+(*
+(* Test And erreur2 *)
+let () = print_string (my_assig_to_string 
+  (typing (("y", Arrow(Ground,Any,Ground))::("x", Ground)::[]) (And(PreVariable("x"),PreVariable("y")))))
+*)
+
+(*
+(* Test Neg Ground *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Ground)::[]) (Neg(PreVariable("x")))))
+*)
+
+(*
+(* Test Neg Arrow *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::[]) (Neg(PreVariable("x")))))
+*)
+
+(*
+(* Test Mu Ground OK *)
+let () = print_string (my_assig_to_string 
+(typing [] (Mu("x", Ground, PreVariable("x")))))
+*)
+
+(*
+(* Test Mu Arrow OK *)
+let () = print_string (my_assig_to_string 
+(typing [] (Mu("x", Arrow(Ground,Any,Ground), PreVariable("x")))))
+*)
+
+(*
+(* Test Mu erreur pas additive *)
+let () = print_string (my_assig_to_string 
+(typing [] (Mu("x", Ground, (Neg(PreVariable("x")))))))
+*)
+
+(*
+(* Test Mu erreur type *)
+let () = print_string (my_assig_to_string 
+(typing [] (Mu("x", Arrow(Ground,Any,Ground), Top))))
+*)
+
+(*
+(* Test Mu Ground mais Arrow dans delta *) 
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::[]) (Mu("x", Ground, PreVariable("x")))))
+*)
+
+(*
+(* Test Lambda Ground OK *)
+let () = print_string (my_assig_to_string 
+(typing [] (Lambda("x", Ground, PreVariable("x")))))
+*)
+
+(*
+(* Test Lambda Arrow OK *)
+let () = print_string (my_assig_to_string 
+(typing [] (Lambda("x", Arrow(Ground,Any,Ground), PreVariable("x")))))
+*)
+
+(*
+(* Test Lambda Ground mais Arrow dans delta *) 
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::[]) (Lambda("x", Ground, PreVariable("x")))))
+*)
+
+(*
+(* Test Application Ground OK *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::("y", Ground)::[]) (Application (PreVariable("x"), PreVariable("y")))))
+*)
+
+(*
+(* Test Application Arrow OK *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Arrow(Ground,Join,Ground),Any,Arrow(Ground,Meet,Ground)))::("y", Arrow(Ground,Join,Ground))::[]) (Application (PreVariable("x"), PreVariable("y")))))
+*)
+
+(*
+(* Test Application erreur Ground *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Ground)::("y", Ground)::[]) (Application (PreVariable("x"), PreVariable("y")))))
+*)
+
+(*
+(* Test Application erreur compatibilite type *)
+let () = print_string (my_assig_to_string 
+(typing (("x", Arrow(Ground,Any,Ground))::("y", Arrow(Ground,Any,Ground))::[]) (Application (PreVariable("x"), PreVariable("y")))))
+*)
+
+(*
+(* Test papier1 *)
+let () = print_string (my_assig_to_string 
+(typing (("F", Arrow(Ground,Antitone,Ground))::("X", Ground)::[]) 
+(desugar
+(Application(PreVariable("F"), PreVariable("X"))))))
+(* => [ (F : (Additive, (Ground Antitone -> Ground)))
+(X : (Antitone, Ground))
+ type : Ground ]*)
+*)
+
+(*
+(* Test papier1 *)
+let () = print_string (my_assig_to_string 
+(typing (("F", Arrow(Ground,Antitone,Ground))::("X", Ground)::[]) 
+(desugar
+(Neg(Application(PreVariable("F"), PreVariable("X")))))))
+(* => [ (X : (Monotone, Ground))
+(F : (NAdditive, (Ground Antitone -> Ground)))
+ type : Ground ] *)
+ *)
+
+(*
+(* Test papier1 *)
+let () = print_string (my_assig_to_string 
+(typing (("F", Arrow(Ground,Antitone,Ground))::("X", Ground)::[]) 
+(desugar
+(PreVariable("F")))))
+(* => [ (F : (Additive, (Ground Antitone -> Ground)))
+ type : (Ground Antitone -> Ground) ] *)
+*)
+
+
+(*
+let () = print_string (comp_typ_env_to_string
+(typ_env_G1_inter_G2 (("F",(Additive, Arrow(Ground,Antitone,Ground)))::[]) (rond Antitone (("X",(Monotone, Ground))::("F",(NAdditive, Arrow(Ground,Antitone,Ground)))::[]))))
+*)
+
+(*
+let () = print_string(
+(v_to_string (greatest_smaller_variances Additive Monotone)))
+*)
+
+(*
+(* Test papier2 *)
+let () = print_string (my_assig_to_string 
+(typing (("Y", Ground)::("F", Arrow(Ground,Antitone,Ground))::("X", Ground)::[]) 
+(desugar
+(Application(PreVariable("F"), Neg(Application(PreVariable("F"), PreVariable("X"))))))))
+*)
+
+(*
+(* Test papier3 *)
+let () = print_string (my_assig_to_string 
+(typing (("Y", Ground)::("F", Arrow(Ground,Antitone,Ground))::[]) 
+(desugar
+(Lambda("X", Ground, Diamond("a", And(PreVariable("Y"), Application(PreVariable("F"), Neg(Application(PreVariable("F"), PreVariable("X")))))))))))
+*)
+
+
+(* Test papier *)
+let () = print_string (my_assig_to_string 
+(typing (("Y", Ground)::[]) 
+(desugar
+(Application (Mu("F", Arrow(Ground,Antitone,Ground), Lambda("X", Ground, Diamond("a", And(PreVariable("Y"), Application(PreVariable("F"), Neg(Application(PreVariable("F"), PreVariable("X")))))))), Box("b", PreVariable("Y")))))))
