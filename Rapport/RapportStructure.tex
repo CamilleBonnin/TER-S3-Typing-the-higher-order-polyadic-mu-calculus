@@ -1,0 +1,140 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{ntheorem}
+\usepackage{xcolor}
+\usepackage{mathpartir}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\newcommand{\avariance}{\upsilon}
+\title{Rapport (structure)}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+
+Présentation rapide du $\mu$-calcul et de ses applications (recherches à faire regarder le model-checking). Donner l'intérêt du $\mu$-calcul par rapport à d'autres logiques dans ces applications.   
+
+\section{Le $\mu$-calcul}
+
+\subsection{Généralités / propriétés (titre à revoir)}
+
+Logique modale et polyadique (rappeler définitions). 
+
+\subsection{Syntaxe et sémantique}
+
+\subsubsection{Enoncés}
+
+Enoncer la syntaxe et la sémantique.
+
+\subsubsection{Exemples}
+
+Exemples pour mieux comprendre le sens des opérateurs. Regarder dans le(s) papier(s) ou à inventer.
+
+\subsection{Variances}
+
+\subsubsection{Définition et intérêt (titre à revoir)}
+
+Intérêt pour la validité de formules avec le point fixe. 
+\\
+Donner une intuition de ce qu'est la variance. Essayer de donner une définition
+
+\subsubsection{Définitions et propriétés}
+
+Treillis des variances (expliquer le sens des variances), additivité, "N-additivité", sémantiques, règles de calcul. 
+
+\subsubsection{Exemples}
+
+Exemples de calculs et du formules valides et non valides à cause de la variance (cf papier).
+
+\subsection{Règles de typage}
+
+\subsubsection{Enoncé}
+
+Enoncer les règles du papier + commentaires (explications).
+
+
+\subsubsection{Exemples}
+
+Donner des exemples (reprendre les précédents + prendre des exemples des formules pour les résultats), faire les arbres + commenter.
+
+\section{($1^{ere}$ ?) Implémentation des règles de typage}
+
+On a enlevé la règle \{i $\longleftarrow$ j\}. (explications).
+
+\subsection{Réécriture des règles de typage}
+
+\subsubsection{Gamma}
+
+Expliquer le Gamma.
+
+\subsubsection{Enoncé et justification}
+
+Donner les nouvelles règles, faire le lien avec les anciennes.
+
+\subsubsection{Exemples}
+
+Reprendre les exemples de la partie précédente.
+
+\subsection{Travail récupéré (titre à revoir)}
+
+Diviser en plusieurs parties.
+\\
+Ce qui a été fait par Thomas (syntaxe, "desugar", calculs sur les variances). 
+\\
+Expliquer les choix pour ce qui n'a pas été gardé ou changé. 
+
+\subsection{Fonction de typage}
+
+\subsubsection{Implémentation des environnements de typage}
+
+Représentation des environnements de typage complets et incomplets + des assignements. 
+
+\subsubsection{La fonction de typage}
+
+Pseudo-code de la fonction "typing". 
+1 section par cas ? (à voir en fonction de la taille).
+\\
+Expliquer le code en le liant aux règles de typage réécrites. 
+
+\subsection{Fonctions annexes}
+
+Calcul de "inter", Gamma "rond" variance, etc : pseudo-code + explications.
+
+\section{(Piste(s) d')Améliorations}
+
+\subsection{Les limites de l'implémentation actuelle}
+
+Le Gamma. 
+
+\subsection{(Piste(s) d')Améliorations}
+
+A voir.
+
+\section{Résultats}
+
+\subsection{Tableau des résultats}
+
+Faire un tableau avec les résultats de tests.
+
+\subsection{Commentaires}
+
+Commenter les résultats, peut-être faire des arbres de typage pour certains.
+
+\section*{Conclusion}
+
+Bref résumé + avis personnel + piste(s) d'approfondissement (adapter avec la partie 3).
+
+
+\bibliographystyle{splncs04}
+\bibliography{TerS3}
+\end{document}
