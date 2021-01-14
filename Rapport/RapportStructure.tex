@@ -22,7 +22,16 @@
 
 \section*{Introduction}
 
-Présentation rapide du $\mu$-calcul et de ses applications (recherches à faire regarder le model-checking). Donner l'intérêt du $\mu$-calcul par rapport à d'autres logiques dans ces applications.   
+\textit{Présentation rapide du $\mu$-calcul polyadique et de ses applications (recherches à faire regarder le model-checking). Donner l'intérêt du $\mu$-calcul par rapport à d'autres logiques dans ces applications.}
+\\\\
+
+Le $\mu$-calcul a tout d'abord été introduit par Scott et de Bakker en 1969 \cite{scott1969theory}, mais a été étendu vers sa forme actuelle la plus utilisée de nos jours par Kozen en 1983 \cite{kozen1983results}. Par la suite, plusieurs extensions au 
+$\mu$-calcul ont été introduites dont le $\mu$-calcul polyadique, introduit par Andersen en 1994 \cite{andersen1994polyadic}, qui permet de manipuler des tuples d'états et le $\mu$-calcul d'ordre supérieur, introduit par Viswanathan et Viswanathan en 2004 \cite{viswanathan2004higher}, qui permet les opérations sur des formules et non plus uniquement sur des états simples. Le $\mu$-calcul polyadique d'ordre supérieur introduit par Lange, Lozes et Guzm{\'a}n en 2014 \cite{lange2014model} et sur lequel porte ce TER est une fusion de ces deux extensions.
+\\
+Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il possède aussi un opérateur de point fixe \color{red} (importance à justifier) \color{black}. Cette logique permet d'exprimer un grand nombre de relations d'équivalence entre des procédés \color{red} (process, traduction à voir) \color{black} différentes. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \cite{lange2014model}, introduit également une méthode générale pour vérifier que deux procédés sont équivalents valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tout les procédés Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. Cela rends la méthode plus facilement adaptable quels que soient P et Q et marche même sans expression de P. 
+\\
+Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est valide ou non d'où l'intérêt de savoir la typer et donc de ce TER. 
+
 
 \section{Le $\mu$-calcul}
 
@@ -58,10 +67,13 @@ Exemples de calculs et du formules valides et non valides à cause de la varianc
 
 \subsection{Règles de typage}
 
+\subsubsection{Définitions}
+
+Gamma + Delta.
+
 \subsubsection{Enoncé}
 
-Enoncer les règles du papier + commentaires (explications).
-
+Enoncer les nouvelles règles du papier + commentaires (explications).
 
 \subsubsection{Exemples}
 
@@ -69,21 +81,8 @@ Donner des exemples (reprendre les précédents + prendre des exemples des formu
 
 \section{($1^{ere}$ ?) Implémentation des règles de typage}
 
-On a enlevé la règle \{i $\longleftarrow$ j\}. (explications).
+On a enlevé la règle \{i $\longleftarrow$ j\} substitution. (explications).
 
-\subsection{Réécriture des règles de typage}
-
-\subsubsection{Gamma}
-
-Expliquer le Gamma.
-
-\subsubsection{Enoncé et justification}
-
-Donner les nouvelles règles, faire le lien avec les anciennes.
-
-\subsubsection{Exemples}
-
-Reprendre les exemples de la partie précédente.
 
 \subsection{Travail récupéré (titre à revoir)}
 
