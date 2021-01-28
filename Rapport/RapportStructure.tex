@@ -27,11 +27,14 @@
 
 Le $\mu$-calcul a tout d'abord été introduit par Scott et de Bakker en 1969 \cite{scott1969theory}, mais a été étendu vers sa forme actuelle la plus utilisée de nos jours par Kozen en 1983 \cite{kozen1983results}. Par la suite, plusieurs extensions au 
 $\mu$-calcul ont été introduites dont le $\mu$-calcul polyadique, introduit par Andersen en 1994 \cite{andersen1994polyadic}, qui permet de manipuler des tuples d'états et le $\mu$-calcul d'ordre supérieur, introduit par Viswanathan et Viswanathan en 2004 \cite{viswanathan2004higher}, qui permet les opérations sur des formules et non plus uniquement sur des états simples. Le $\mu$-calcul polyadique d'ordre supérieur introduit par Lange, Lozes et Guzm{\'a}n en 2014 \cite{lange2014model} et sur lequel porte ce TER est une fusion de ces deux extensions.
-\\
-Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il possède aussi un opérateur de point fixe \color{red} (importance à justifier) \color{black}. Cette logique permet d'exprimer un grand nombre de relations d'équivalence entre des procédés \color{red} (process, traduction à voir) \color{black} différentes. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \cite{lange2014model}, introduit également une méthode générale pour vérifier que deux procédés sont équivalents valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tout les procédés Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. Cela rends la méthode plus facilement adaptable quels que soient P et Q et marche même sans expression de P. 
-\\
-Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est valide ou non d'où l'intérêt de savoir la typer et donc de ce TER. 
 
+\color{red}
+Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il permet par exemple d'exprimer des relations sur les automates. Le $\mu$-calcul polyadique d'ordre supérieur possède aussi un opérateur de point fixe ce qui permet de formuler des propriétés représentant des suites infinies d'états. 
+
+Cette logique permet d'exprimer un grand nombre de relations d'équivalence entre des processus différentes. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \cite{lange2014model}, introduit également une méthode générale pour vérifier que deux processus sont équivalents valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tous les processus Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. Cela rends la méthode plus facilement adaptable quels que soient P et Q et marche même sans expression de P. 
+
+Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est bien formée ou non d'où l'intérêt de savoir la typer et donc de ce TER. 
+\color{black}
 
 \section{Le $\mu$-calcul}
 
@@ -43,7 +46,7 @@ Logique modale et polyadique (rappeler définitions).
 
 \subsubsection{Enoncés}
 
-Enoncer la syntaxe et la sémantique.
+Enoncer la syntaxe et la sémantique. 
 
 \subsubsection{Exemples}
 
@@ -53,13 +56,26 @@ Exemples pour mieux comprendre le sens des opérateurs. Regarder dans le(s) papi
 
 \subsubsection{Définition et intérêt (titre à revoir)}
 
-Intérêt pour la validité de formules avec le point fixe. 
+\textit{Intérêt pour la validité de formules avec le point fixe. 
 \\
-Donner une intuition de ce qu'est la variance. Essayer de donner une définition
+Donner une intuition de ce qu'est la variance. Essayer de donner une définition}
+\\\\
+\color{red}
+L'algorithme de model-checking pour le $\mu$-calcul polyadique d'ordre 1 possède une complexité en EXPTIME, mais dans le cas où les variances de toutes les variables présentes dans dans la formule sont additives (ni $any$, ni $\varnothing$, ni $\bar{\varnothing}$), alors il existe un algorithme de model-checking qui résout le problème avec une complexité de PSPACE \cite{lange2014model}.    
+
+On peut voir la variance comme la variation de la fonction représentée par la variable ou la formule (rappelons que comme en $\lambda$-calcul, les variables sont des fonctions). \color{black}  
 
 \subsubsection{Définitions et propriétés}
 
-Treillis des variances (expliquer le sens des variances), additivité, "N-additivité", sémantiques, règles de calcul. 
+\textit{Treillis des variances (expliquer le sens des variances), additivité, "N-additivité", sémantiques, règles de calcul.}
+\\\\
+
+Faire le treillis
+\\\\
+
+\color{red}
+Pour reprendre le parallèle entre les variances et les variations des fonctions, on peut voir une variable $none$ comme une fonction constante et une variable $any$ comme une fonction quelconque. Les variables avec les autres variances sont des fonctions monotones, croissantes pour les variables avec les variances $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$ et $\varnothing$, décroissantes pour les variables avec les variances duales à ces dernières. \color{black}
+
 
 \subsubsection{Exemples}
 
@@ -73,7 +89,7 @@ Gamma + Delta.
 
 \subsubsection{Enoncé}
 
-Enoncer les nouvelles règles du papier + commentaires (explications).
+Enoncer les nouvelles règles du papier + commentaires (explications). \color{red} Pour règle du $\mu$, commenter que l'on doit avoir une variance qui correspond à une variation croissante pour avoir un point fixe. \color{black}
 
 \subsubsection{Exemples}
 
