@@ -3,13 +3,14 @@
 \usepackage[french]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{makeidx}
 \usepackage{graphicx}
 \usepackage{lmodern}
-\usepackage{ntheorem}
 \usepackage{xcolor}
+\usepackage{mathabx}
 \usepackage{mathpartir}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \newcommand{\avariance}{\upsilon}
@@ -20,6 +21,24 @@
 
 \maketitle
 
+\theoremstyle{plain}
+\newtheorem{thm}{Théorème}
+\newtheorem{lem}{Lemme}
+\newtheorem{crl}{Corollaire}
+\newtheorem{prop}{Proposition}
+
+\theoremstyle{remark}
+\newtheorem{rema}{Remarque}
+
+\theoremstyle{definition}
+\newtheorem{notat}{Notation}
+\newtheorem{dfn}{Définition}
+\newtheorem{exem}{Exemple}
+
+\theoremstyle{nonumberplain}
+\newtheorem{idp}{Idée de preuve}
+\newtheorem{prv}{Preuve}
+
 \section*{Introduction}
 
 \textit{Présentation rapide du $\mu$-calcul polyadique et de ses applications (recherches à faire regarder le model-checking). Donner l'intérêt du $\mu$-calcul par rapport à d'autres logiques dans ces applications.}
@@ -28,25 +47,75 @@
 Le $\mu$-calcul a tout d'abord été introduit par Scott et de Bakker en 1969 \cite{scott1969theory}, mais a été étendu vers sa forme actuelle la plus utilisée de nos jours par Kozen en 1983 \cite{kozen1983results}. Par la suite, plusieurs extensions au 
 $\mu$-calcul ont été introduites dont le $\mu$-calcul polyadique, introduit par Andersen en 1994 \cite{andersen1994polyadic}, qui permet de manipuler des tuples d'états et le $\mu$-calcul d'ordre supérieur, introduit par Viswanathan et Viswanathan en 2004 \cite{viswanathan2004higher}, qui permet les opérations sur des formules et non plus uniquement sur des états simples. Le $\mu$-calcul polyadique d'ordre supérieur introduit par Lange, Lozes et Guzm{\'a}n en 2014 \cite{lange2014model} et sur lequel porte ce TER est une fusion de ces deux extensions.
 
-\color{red}
 Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il permet par exemple d'exprimer des relations sur les automates. Le $\mu$-calcul polyadique d'ordre supérieur possède aussi un opérateur de point fixe ce qui permet de formuler des propriétés représentant des suites infinies d'états. 
 
 Cette logique permet d'exprimer un grand nombre de relations d'équivalence entre des processus différentes. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \cite{lange2014model}, introduit également une méthode générale pour vérifier que deux processus sont équivalents valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tous les processus Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. Cela rends la méthode plus facilement adaptable quels que soient P et Q et marche même sans expression de P. 
 
 Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est bien formée ou non d'où l'intérêt de savoir la typer et donc de ce TER. 
-\color{black}
 
-\section{Le $\mu$-calcul}
+\section{Le $\mu$-calcul polyadique d'ordre supérieur}
 
-\subsection{Généralités / propriétés (titre à revoir)}
+\subsection{Généralités}
 
-Logique modale et polyadique (rappeler définitions). 
+\textit{Logique modale, polyadique et d'ordre supérieur (rappeler définitions).}
+\\\\
+
+Le $\mu$-calcul polyadique d'ordre supérieur est une logique modale polyadique et qui permet le passage à l'ordre supérieur. 
+
+\begin{dfn}[\textit{Logique modale}] Une logique modale est une logique qui spécifie la véracité d'une formule par le biais de modalités.
+\end{dfn}
+
+\begin{rema} Les logiques temporelles sont des logiques modales qui possèdent notamment les modalités suivantes : "toujours" (noté []), "un jour" (noté $\langle\rangle$) et "jamais" (noté $\neg$[]).
+\end{rema}
+
+Le $\mu$-calcul (et par extension le $\mu$-calcul polyadique d'ordre supérieur) est une logique temporelle dont on peut extraire d'autres logiques comme CTL* (qui contient elle-même CTL et LTL). 
+ 
+\begin{dfn}[\textit{Logique polyadique (ou de dimension supérieure)}] Une logique polyadique (ou de dimension supérieure) est une logique qui permet les opérations sur des tuples d'états.
+\end{dfn}
+
+\begin{dfn}[\textit{Logique d'ordre supérieur}] Une logique d'ordre supérieur est une logique qui permet les opérations des formules par opposition aux logiques du premier ordre qui permettent uniquement les opérations sur les états seuls.
+\end{dfn}
 
 \subsection{Syntaxe et sémantique}
 
 \subsubsection{Enoncés}
 
-Enoncer la syntaxe et la sémantique. 
+
+\textit{Enoncer la syntaxe et la sémantique.}
+\\
+
+Pour pouvoir énoncer la syntaxe du $\mu$-calcul polyadique d'ordre supérieur, commençons par poser quelques notations. 
+
+Supposons que nous avons un système de transition (Pr, Act, $\rightarrow$) où Pr = \{P, Q, ...\} est un ensemble d'états, Act = \{a, b, ...\} un ensemble d'actions et $\rightarrow$ la relation de transition entre deux états P et Q par l'action a (notée P $\xrightarrow[]{a}$ Q). i$_{1}$, i$_{2}$, ..., i$_{n}$ et j$_{1}$, j$_{2}$, ..., j$_{n}$ représentent les n composants d'un tuple. 
+
+Les variables (ensemble Var) sont notées X, Y, Z, ... ou F, G, H, ... Enfin, les formules sont notées $\Phi$, $\Psi$, ... et le type d'une variable ou d'une formule peut-être soit un type de base (noté $\bullet$), soit un type flèche (noté $\tau_1^{\nu} \rightarrow \tau_2$ où $\nu$ est une variance et $\tau_1$, $\tau_2$ deux types quelconques).
+
+On peut maintenant énoncer la syntaxe du $\mu$-calcul polyadique d'ordre supérieur :
+\\
+$\Phi$, $\Psi$ ::= $\top$ | $\Phi \wedge \Psi$ | $\neg\Phi$ | $\langle a \rangle_i \Phi$ | $\{i_{1}, i_{2}, ..., i_{n}\} \leftarrow \{j_{1}, j_{2}, ..., j_{n}\} \Phi$ | X | $\mu$X $: \tau . \Phi$ | $\lambda$X$^{\nu} : \tau . \Phi$ | $\Phi \Psi$
+
+\begin{rema} Dans $\langle a \rangle_i \Phi$, le i indique le i$^{e}$ élément du tuple $\Phi$ qui est modifié par l'action a. 
+\end{rema}
+
+\begin{notat} On peut rajouter par sucre syntaxique les cinq opérateurs suivants : 
+\\ 
+$\Phi \vee \Psi ::= \neg (\neg \Phi \wedge \neg \Psi)$ ;
+\\
+$\upsilon$ X . $\Phi ::= \neg \mu$X . $\neg \Phi [\neg$X/X$]$ (remplacement de X par $\neg$X) ; 
+\\
+$[a]_i \Phi ::= \neg \langle a \rangle_i \neg \Phi$ ;
+\\
+$\Phi \Rightarrow \Psi ::= \neg \Phi \vee \Psi$ ;
+\\
+$\Phi \Leftrightarrow \Psi ::= (\Phi \Rightarrow \Psi) \wedge (\Psi \Rightarrow \Phi)$.
+\end{notat}
+
+On note r la taille maximale d'un tuple d'états dans la formule regardée. On peux maintenant énoncer la sémantique du $\mu$-calcul polyadique d'ordre supérieur :
+\\
+$\ldbrack \top \rdbrack$ = Pr$^r$
+\\
+
+
 
 \subsubsection{Exemples}
 
@@ -61,9 +130,9 @@ Exemples pour mieux comprendre le sens des opérateurs. Regarder dans le(s) papi
 Donner une intuition de ce qu'est la variance. Essayer de donner une définition}
 \\\\
 \color{red}
-L'algorithme de model-checking pour le $\mu$-calcul polyadique d'ordre 1 possède une complexité en EXPTIME, mais dans le cas où les variances de toutes les variables présentes dans dans la formule sont additives (ni $any$, ni $\varnothing$, ni $\bar{\varnothing}$), alors il existe un algorithme de model-checking qui résout le problème avec une complexité de PSPACE \cite{lange2014model}.    
+L'algorithme de model-checking pour le $\mu$-calcul polyadique d'ordre 1 possède une complexité en EXPTIME, mais dans le cas où les variances de toutes les variables possède une propriété particulière, alors il existe un algorithme de model-checking qui résout le problème avec une complexité de PSPACE \cite{lange2014model}.    
 
-On peut voir la variance comme la variation de la fonction représentée par la variable ou la formule (rappelons que comme en $\lambda$-calcul, les variables sont des fonctions). \color{black}  
+On peut voir la variance comme la monotonie de la fonction représentée par la variable ou la formule (rappelons que comme en $\lambda$-calcul, les variables sont des fonctions). \color{black}  
 
 \subsubsection{Définitions et propriétés}
 
@@ -74,7 +143,7 @@ Faire le treillis
 \\\\
 
 \color{red}
-Pour reprendre le parallèle entre les variances et les variations des fonctions, on peut voir une variable $none$ comme une fonction constante et une variable $any$ comme une fonction quelconque. Les variables avec les autres variances sont des fonctions monotones, croissantes pour les variables avec les variances $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$ et $\varnothing$, décroissantes pour les variables avec les variances duales à ces dernières. 
+Pour reprendre le parallèle entre les variances et les monotonies des fonctions, on peut voir une variance $none$ comme une fonction constante et une variable $any$ comme une fonction quelconque. Les variables avec les autres variances sont des fonctions monotones, croissantes pour les variables avec les variances $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$ et $\varnothing$, décroissantes pour les variables avec les variances duales à ces dernières. 
 \\
 
 Définition ($\sqcap$-additivité et $\sqcup$-additivité) : Une fonction $f$ : A $\rightarrow$ B est $\sqcap$-additive (resp $\sqcup$-additive) si $\forall x, y \in$ A$^2$, $f(x \sqcap y) = f(x) \sqcap f(y)$ (resp $f(x \sqcup y) = f(x) \sqcup f(y)$).
