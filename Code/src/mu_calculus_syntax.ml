@@ -134,7 +134,7 @@ let rec assoc_list_var_to_string (lvar : (var * int) list) : string =
     | (v, n)::rest -> "(" ^ v ^ ", " ^ string_of_int n ^ ") \n" ^ assoc_list_var_to_string rest
 
 (* Ajoute la variable x a la liste de variables associative lvar *)
-let rec add_var_to_list (lvar : (var * int) list) (x : var) : (var * int) list =
+let  add_var_to_list (lvar : (var * int) list) (x : var) : (var * int) list =
   match (List.mem_assoc x lvar) with
     | true -> (x, ((List.assoc x lvar) + 1))::(List.remove_assoc x lvar)
     | false -> (x, 1)::lvar
