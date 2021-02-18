@@ -4,7 +4,7 @@
 \contentsline {subsection}{\numberline {2.1}Propriétés et opérateurs}{2}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Variances}{4}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Règles de typage}{6}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Implémentation des règles de typage}{7}{section.3}%
-\contentsline {section}{\numberline {4}Résultats}{8}{section.4}%
-\contentsline {section}{\numberline {5}Conclusion}{9}{section.5}%
-\contentsline {section}{Bibliographie}{9}{section*.2}%
+\contentsline {section}{\numberline {3}Implémentation des règles de typage}{9}{section.3}%
+\contentsline {section}{\numberline {4}Résultats}{14}{section.4}%
+\contentsline {section}{\numberline {5}Conclusion}{14}{section.5}%
+\contentsline {section}{Bibliographie}{14}{section*.2}%
