@@ -321,7 +321,7 @@ ${v \circ \Gamma} := {\Gamma = \{X_1^{v \, \circ \, v_1} : \tau_1, \ldots, X_n^{
 
 On peut maintenant énoncer les règles d'inférence de variances du $\mu$-calcul d'ordre supérieur qui composent la fonction $type(.)$.
 
-\begin{dfn} [Règles de typage] Les règles d'inférence de variances du $\mu$-calcul d'ordre supérieur sont les suivantes :
+\begin{dfn} [Règles d'inférence de variances] Les règles d'inférence de variances du $\mu$-calcul d'ordre supérieur sont les suivantes :
 \begin{center}
 $\inferrule
 { }
@@ -382,7 +382,7 @@ $ $
 
 Avant d'expliquer plus en détail ces règles d'inférence de variances, on peut remarquer que l'on doit connaître à l'avance le type des variables libres de la formule avec leurs informations de variances. Connaître le type de ces variables est possible avec une version annotée du $\mu$-calcul d'ordre supérieur mais connaître les informations de variance de ces types est une hypothèse plus compliquée à mettre en pratique. 
 
-Donnons maintenant quelques explications à propos de ces règles de typage.
+Donnons maintenant quelques explications à propos de ces règles d'inférence de variances.
 \begin{itemize}
 	\item (\textsc{T-top}) : axiome.
 	\item (\textsc{T-et}) : $\Phi$ et $\Gamma$ doivent être des types $\bullet$ car la conjonction d'une fonction avec un type de base ou de deux fonctions n'a aucun sens. On obtient un environnement de typage qui combine les environnements de typage de $\Phi$ et $\Gamma$ et donc qui interdit de se retrouver avec une même variable possédant deux types différents et qui adapte si besoin la variance d'une variable à la plus grande variance commune.
