@@ -1,0 +1,15 @@
+Pour exécuter ces fichier :
+
+-se placer dans le répertoire contenant ces fichiers;
+tapper les commandes suivantes dans l'ordre :
+	-ocamlc variance_syntax.mli
+	-ocamlc variance_syntax.ml
+	-ocamlc mu_calculus_syntax.mli
+	-ocamlc variance_syntax.cmo mu_calculus_syntax.ml
+	(- si l'on veut faire des tests sur les fonctions de mu_calculus_syntax.ml, tapper ./camlprog.exe)
+	-ocamlc variance.mli
+	-ocamlc variance_syntax.cmo mu_calculus_syntax.cmo variance.ml
+	-ocamlc mu_calculus.mli
+	-ocamlc variance_syntax.cmo mu_calculus_syntax.cmo variance.cmo mu_calculus.ml
+	-décommenter un test ou en rédiger un nouveau sur le même modèle
+	-./camlprog.exe

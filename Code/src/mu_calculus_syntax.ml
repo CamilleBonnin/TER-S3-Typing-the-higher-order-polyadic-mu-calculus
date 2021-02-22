@@ -22,7 +22,7 @@ type sugared_formula =
   | PreVariable of var
   | Mu of var * mu_type * sugared_formula (* smallest fix point *)
   | Nu of var * mu_type * sugared_formula (* greatest fix point *)
-  | Lambda of var * mu_type * sugared_formula      (*for higher order*)
+  | Lambda of var * variance * mu_type * sugared_formula      (*for higher order*)
   | Application of sugared_formula * sugared_formula
 
 (* Represente une formule sans le sucre syntaxique *)
@@ -33,7 +33,7 @@ type formula =
   | Diamond of var * (* * int for polyadic * *) formula
   | PreVariable of var
   | Mu of var * mu_type * formula (* smallest fix point *)
-  | Lambda of var * mu_type * formula      (*for higher order*)
+  | Lambda of var * variance * mu_type * formula      (*for higher order*)
   | Application of formula * formula
 
 (* Represente un environnement de typage incomplet (delta). *)
@@ -54,7 +54,7 @@ let rec neg_var (phi : formula) (x : var) : formula =
     | Diamond (a, phi) -> Diamond (a, neg_var phi x)
     | PreVariable (y) ->  if (String.equal x y) then Neg(phi) else phi
     | Mu (y,tau,phi) -> Mu(y,tau,neg_var phi x)
-    | Lambda (y, tau, phi) -> Lambda (y, tau, neg_var phi x)
+    | Lambda (y, var, tau, phi) -> Lambda (y, var, tau, neg_var phi x)
     | Application (phi,psi) -> Application(neg_var phi x, psi)
 
 (* Enleve le sucre syntaxique d'une formule *)
@@ -70,7 +70,7 @@ let rec desugar (sf : sugared_formula) : formula =
   | PreVariable (x) -> PreVariable(x)
   | Mu (x,t,phi) -> Mu (x, t, desugar phi)
   | Nu (x,t,phi) -> Neg (Mu (x, t, Neg( neg_var (desugar phi) x)))
-  | Lambda (x, t, phi) ->  Lambda (x, t, desugar phi)
+  | Lambda (x, var, t, phi) ->  Lambda (x, var, t, desugar phi)
   | Application (phi,psi) -> Application (desugar phi, desugar psi)
 
 (* Transforme un type en chaine de caracteres *)
@@ -93,7 +93,7 @@ let rec sf_to_string (phi : sugared_formula) : string =
     | PreVariable (x) -> x
     | Mu (f, tau, psi) -> "Mu "^ f ^":"^ t_to_string tau ^".("^ sf_to_string psi^")"
     | Nu (f, tau, psi) -> "Nu "^ f ^":"^ t_to_string tau ^"."^ sf_to_string psi
-    | Lambda (x, tau, psi) -> "Lambda " ^ x  ^":"^ t_to_string tau ^"."^ sf_to_string psi
+    | Lambda (x, var, tau, psi) -> "Lambda " ^ x  ^ "^" ^ v_to_string var ^":"^ t_to_string tau ^"."^ sf_to_string psi
     | Application (f, psi) -> sf_to_string f ^ sf_to_string psi
 
 (* Transforme une formule sans sucre syntaxique en chaine de caracteres *)
@@ -105,7 +105,7 @@ let rec f_to_string (phi : formula) : string =
     | Neg (psi) -> "!(" ^ f_to_string psi^")"
     | PreVariable (x) -> x
     | Mu (f, tau, psi) -> "Mu "^ f ^":"^ t_to_string tau ^".("^ f_to_string psi ^")"
-    | Lambda (x, tau, psi) -> "Lambda " ^ x  ^":"^ t_to_string tau ^"."^ f_to_string psi
+    | Lambda (x, var, tau, psi) -> "Lambda " ^ x  ^ "^" ^ v_to_string var ^":"^ t_to_string tau ^"."^ f_to_string psi
     | Application (f, psi) -> f_to_string f ^ f_to_string psi  
 
 (* Transforme un environnement de typage incomplet en chaine de caracteres *)
@@ -165,7 +165,7 @@ let rec rec_f_free_variables (phi : formula) (lvar : (var * int) list) (toRemove
   | Diamond (a, phi2) -> rec_f_free_variables phi2 lvar toRemove
   | PreVariable (y) -> add_var_to_list lvar y
   | Mu (y,tau,phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
-  | Lambda (y, tau, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
+  | Lambda (y, var, tau, phi2) -> remove_list (rec_f_free_variables phi2 lvar (y::toRemove)) (y::toRemove)
   | Application (phi2,psi) -> concat_lists (rec_f_free_variables phi2 lvar toRemove) 
                                               (rec_f_free_variables psi lvar toRemove)
 

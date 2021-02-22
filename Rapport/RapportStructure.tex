@@ -85,28 +85,32 @@ $\mu$-calcul ont été introduites dont le $\mu$-calcul polyadique, introduit pa
 
 Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il permet par exemple d'exprimer des relations sur les automates. Le $\mu$-calcul polyadique d'ordre supérieur possède aussi un opérateur de point fixe ce qui permet de formuler des propriétés représentant des suites infinies d'états. 
 
-Cette logique permet d'exprimer un grand nombre de relations d'équivalence entre des processus différentes. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \citep{lange2014model}, introduit également une méthode générale pour vérifier que deux processus sont équivalents valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tous les processus Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. Cela rends la méthode plus facilement adaptable quels que soient P et Q et marche même sans expression de P. 
+Cette logique permet d'exprimer un grand nombre de relations d'équivalence différentes entre des processus. Ce dernier point est particulièrement intéressant au niveau du model-checking car le même papier qui introduit cette logique \citep{lange2014model}, introduit également une méthode générale pour vérifier que deux processus sont équivalents et cette méthode est valable pour toutes les relations d'équivalence qui peuvent être exprimées par le $\mu$-calcul polyadique d'ordre supérieur. La nouveauté de cette méthode est qu'au lieu de définir une formule $F^P(Q)$ qui représente tous les processus Q équivalents à P, on a directement une formule $F(P, Q)$ qui est valable pour tous les P. La méthode est ainsi plus facilement adaptable quels que soient P et Q et fonctionne même sans expression de P. 
 
-Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est bien formée ou non d'où l'intérêt de savoir la typer et donc de ce TER. L'aspect polyadique du $\mu$-calcul n'apportant pas de difficulté supplémentaire au niveau du typage (mais pas au niveau de l'interprétation), ce TER se focalise sur les formules du $\mu$-calcul d'ordre supérieur sans l'aspect polyadique. 
+Le $\mu$-calcul polyadique d'ordre supérieur est donc une logique qui mérite d'être étudiée. Mais avant d'utiliser une formule écrite avec cette logique, il faut savoir si cette formule est bien formée ou non d'où l'intérêt de savoir la typer et donc de ce TER. L'aspect polyadique du $\mu$-calcul n'apportant pas de difficulté supplémentaire au niveau du typage (mais il en va autrement de l'interprétation), ce TER se focalise sur les formules du $\mu$-calcul d'ordre supérieur sans l'aspect polyadique. 
+
+Dans l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model}, les variables ne possèdent pas uniquement un type mais aussi une variance (décrite en section \ref{sec:variances}). Le problème de l'inférence de types consiste donc à trouver le type de la formule générale mais aussi la variance et le type de toutes les variables libres de cette formule. Dans ce TER, nous allons réduire le problème. Au lieu de nous intéresser à l'inférence de types, nous allons regarder l'inférence de variances. Nous connaîtrons ainsi déjà le type des variables et nous devrons uniquement trouver leur variance ainsi que le type de la formule générale.  
+
+Pour aborder ce problème, nous commencerons par donner une présentation du $\mu$-calcul d'ordre supérieur ainsi que de la notion de variance. Ensuite nous définirons plus en détail le problème de l'inférence de variances avant de présenter l'algorithme qui permet de le résoudre et son implémentation. Nous donnerons ensuite un tableau avec les résultats des tests réalisés avant de conclure.   
 
 \section{Le $\mu$-calcul d'ordre supérieur\label{sec:muCalcul}}
 
 \subsection{Propriétés et opérateurs\label{sec:prop&op}}
 
-Le $\mu$-calcul d'ordre supérieur est une logique modale qui permet le passage à l'ordre supérieur. Une logique d'ordre supérieur est une logique qui permet de décrire des formules dans lesquelles les variables sont d'autres formules ou des fonctions par opposition aux logiques du premier ordre qui décrivent uniquement les formules dont les variables sont des états seuls. Une logique modale quand à elle est une logique pour laquelle la véracité d'une formule est spécifiée par le biais de modalités. Par exemple, les logiques temporelles qui sont des logiques modales possèdent les modalités suivantes : "toujours" (noté $\Box$), "un jour" (noté $\Diamond$) et "jamais" (noté $\neg \Diamond$). Les modalités du $\mu$-calcul (et du $\mu$-calcul d'ordre supérieur) sont les modalités classiques de la logique modale : "nécessaire" (qui ne peut pas ne pas être vrai, noté $\Box$), "contingent" (qui peut être faux, noté $\neg \Box$), "possible" (qui peut être vrai, noté $\Diamond$) et "impossible" (qui ne peut pas ne pas être faux, noté $\neg \Diamond$) auxquelles on a rajouter les opérateurs de point fixe (notés $\mu$ et $\nu$).
+Le $\mu$-calcul d'ordre supérieur est une logique modale qui permet le passage à l'ordre supérieur. Une logique d'ordre supérieur est une logique qui permet de décrire des formules dans lesquelles les variables sont d'autres formules ou des fonctions par opposition aux logiques du premier ordre qui décrivent uniquement les formules dont les variables sont des états seuls. Une logique modale quand à elle est une logique pour laquelle la véracité d'une formule est spécifiée par le biais de modalités. Par exemple, les logiques temporelles qui sont des logiques modales possèdent les modalités suivantes : "toujours" (noté $\Box$), "un jour" (noté $\Diamond$) et "jamais" (noté $\neg \Diamond$). Les modalités du $\mu$-calcul (et du $\mu$-calcul d'ordre supérieur) sont les modalités classiques de la logique modale : "nécessaire" (qui ne peut pas ne pas être vrai, noté $\Box$), "contingent" (qui peut être faux, noté $\neg \Box$), "possible" (qui peut être vrai, noté $\Diamond$) et "impossible" (qui ne peut pas ne pas être faux, noté $\neg \Diamond$) auxquelles on a rajouté les opérateurs de point fixe (notés $\mu$ et $\nu$).
 
 Le $\mu$-calcul (et par extension le $\mu$-calcul d'ordre supérieur) est une logique modale qui permet de décrire un grand nombre de formules. On peut extraire du $\mu$-calcul des logiques temporelles comme CTL* (qui contient elle-même CTL et LTL, deux logiques très utilisées en model-checking). 
 
-Avant d'énoncer la syntaxe du $\mu$-calcul d'ordre supérieur, introduisons les notations suivantes : les variables (ensemble Var) sont notées $X, Y, Z, \ldots$ ou $F, G, H, \ldots$, les formules sont notées $\Phi$, $\Psi$, $\ldots$ et les actions sont notées $a, b, \ldots$. Nous utilisons une version annotée du $\mu$-calcul d'ordre supérieur d'où la présence d'indications de typage dans la syntaxe. Le type d'une variable ou d'une formule, décrit en \ref{regles}, peut-être soit un type de base (noté $\bullet$), soit un type $\rightarrow$ (noté $\tau_1^{v} \rightarrow \tau_2$ où $v$ est une variance, décrite en \ref{sec:variances}, et $\tau_1$, $\tau_2$ sont deux types quelconques).
+Avant d'énoncer la syntaxe du $\mu$-calcul d'ordre supérieur, introduisons les notations suivantes : les variables (ensemble Var) sont notées $X, Y, Z, \ldots$ ou $F, G, H, \ldots$, les formules sont notées $\Phi$, $\Psi$, $\ldots$ et les actions sont notées $a, b, \ldots$. Nous utilisons une version annotée du $\mu$-calcul d'ordre supérieur d'où la présence d'indications de typage dans la syntaxe. Le type d'une variable ou d'une formule, décrit en \ref{syst typage}, peut-être soit un type de base (noté $\bullet$), soit un type $\rightarrow$ (noté $\tau_1^{v} \rightarrow \tau_2$ où $v$ est une variance, décrite en \ref{sec:variances}, et $\tau_1$, $\tau_2$ sont deux types quelconques).
 
 \begin{dfn}[Syntaxe du $\mu$-calcul d'ordre supérieur] La syntaxe du $\mu$-calcul d'ordre supérieur est la suivante :
-\[\Phi, \Psi ::= \top \text{ | } \Phi \wedge \Psi \text{ | } \neg\Phi \text{ | } \langle a \rangle \Phi \text{ | } X \text{ | } \mu X : \tau . \Phi \text{ | } \lambda X^{v} : \tau . \Phi \text{ | } \Phi \Psi\]
+\[\Phi, \Psi ::= \top \text{ | } \Phi \wedge \Psi \text{ | } \neg\Phi \text{ | } \langle a \rangle \Phi \text{ | } X \text{ | } \mu X : \tau \ . \ \Phi \text{ | } \lambda X^{v} : \tau \ . \ \Phi \text{ | } \Phi \Psi\]
 \end{dfn}\label{def:syntaxe}
 
 \begin{notat} Les cinq opérateurs suivants peuvent s'exprimer à partir des opérateurs précédents : 
 \begin{align*}
 	\Phi \vee \Psi &::= \neg (\neg \Phi \wedge \neg \Psi)\\
-	\nu X . \Phi &::= \neg \mu X . \neg \Phi [\neg X/X] \text{ (remplacement de } X \text{ par } \neg X)\\
+	\nu X \ . \ \Phi &::= \neg \mu X . \neg \Phi [\neg X/X] \text{ (remplacement de } X \text{ par } \neg X)\\
 	[a] \Phi &::= \neg \langle a \rangle \neg \Phi\\
 	\Phi \Rightarrow \Psi &::= \neg \Phi \vee \Psi\\
 	\Phi \Leftrightarrow \Psi &::= (\Phi \Rightarrow \Psi) \wedge (\Psi \Rightarrow \Phi)
@@ -115,10 +119,10 @@ Avant d'énoncer la syntaxe du $\mu$-calcul d'ordre supérieur, introduisons les
 
 Pour pouvoir donner le sens des opérateurs du $\mu$-calcul d'ordre supérieur, il nous faut définir un système de transition d'états. 
 
-\begin{dfn}[Système de transition d'états labellisé] Un système de transition d'états labellisé est un triplet $\text{(Pr, Act,} \rightarrow)$ où Pr est un ensemble d'états, Act un ensemble d'actions et ${\rightarrow \text{: Pr} \times \text{Act} \rightarrow \text{Pr}}$ une relation de transition. Un système de transition d'états labellisé décrit les passages d'un éléments de Pr à un autre par le biais d'un élément de Act.  
+\begin{dfn}[Système de transition d'états labellisé] Un système de transition d'états labellisé est un triplet $\text{(Pr, Act,} \rightarrow)$ où Pr est un ensemble d'états (ou processus), Act un ensemble d'actions et ${\rightarrow \subseteq \text{Pr} \times \text{Act} \rightarrow \text{Pr}}$ une relation de transition. Un système de transition d'états labellisé décrit les passages d'un élément de Pr à un autre par le biais d'un élément de Act.  
 \end{dfn}
 
-Supposons dans toute la suite que nous avons un système de transition d'états labellisé $\text{(Pr, Act,} \rightarrow)$ où Pr = $\{P, Q, \ldots\}$ est un ensemble d'états, Act = $\{a, b,\ldots\}$ un ensemble d'actions et $\rightarrow$ la relation de transition entre deux états $P$ et $Q$ par l'action $a$ (notée $P\xrightarrow[]{a} Q$).  
+Supposons, dans toute la suite, que nous avons un système de transition d'états labellisé $\text{(Pr, Act,} \rightarrow)$ où Pr = $\{P, Q, \ldots\}$ est un ensemble d'états, Act = $\{a, b,\ldots\}$ un ensemble d'actions et $\rightarrow$ la relation de transition entre deux états $P$ et $Q$ par l'action $a$ (notée $P\xrightarrow[]{a} Q$).  
 
 Pour des raisons de simplification, nous n'allons pas donner la sémantique formelle des opérateurs du $\mu$-calcul d'ordre supérieur car elle n'est pas utile pour typer les formules, mais nous allons donner ici une intuition informelle du sens des opérateurs introduits en définition \ref{def:syntaxe} :
 
@@ -126,33 +130,59 @@ Pour des raisons de simplification, nous n'allons pas donner la sémantique form
   \item $\top$ ("top") : constante, représente n'importe quel état ;
   \item $\Phi \wedge \Psi$ ("conjonction") : est vraie si $\Phi$ et $\Psi$ sont toutes les deux vraies ;
   \item $\neg\Phi$ ("négation") : est vraie si $\Phi$ est fausse ;
-  \item $\langle a \rangle \Phi$ ("diamant") : représente le possible, est vraie dans un état P de Pr s'il existe au moins un état Q de Pr pour lequel $\Phi$ est vraie et que le système de transitions d'états labellisés (Pr, Act, $\rightarrow$) comporte une transition $P\xrightarrow[]{a} Q$ ;
-  \item $\mu X : \tau . \Phi$ ("plus petit point fixe") : représente le plus petit point fixe, le plus petit élément $el$ de type $\tau$ pour lequel $\Phi (el) = el$. Cet opérateur est utilisé pour représenter la propriété de vivacité ("quelque chose de bien va éventuellement arriver") ; 
-  \item $\lambda X^{v} : \tau . \Phi$ ("lambda abstraction") : permet de représenter les fonctions ;
+  \item $\langle a \rangle \Phi$ ("diamant") : représente le possible, est vraie dans un état P de Pr s'il existe au moins un état Q de Pr pour lequel $\Phi$ est vraie et que le système de transition d'états labellisé (Pr, Act, $\rightarrow$) comporte une transition $P\xrightarrow[]{a} Q$ ;
+  \item $\mu X : \tau \  . \ \Phi$ ("plus petit point fixe") : représente le plus petit point fixe, le plus petit élément $el$ de type $\tau$ pour lequel $\Phi (el) = el$. Cet opérateur est utilisé pour représenter la propriété de vivacité ("quelque chose de bien va ultimement arriver") ; 
+  \item $\lambda X^{v} : \tau \ . \ \Phi$ ("lambda abstraction") : permet de représenter les fonctions ;
   \item $\Phi \Psi$ ("application") : le résultat de l'application de $\Phi$ (fonction) à $\Psi$.
 \end{itemize}
 
-La définition suivante est une notion qui sera utile pour le typage des formule. 
+La notion de variable libre sera utile pour le typage des formules. On dit qu'une variable $X$ d'une formule $\Phi$ du $\mu$-calcul d'ordre supérieur est libre si elle n'a pas été introduite par un opérateur $\mu$ ou $\lambda$. 
 
-\begin{dfn}[Variable libre] On dit qu'une variable $X$ d'une formule $\Phi$ du $\mu$-calcul d'ordre supérieur est libre si elle n'a pas été introduite par un opérateur $\mu$ ou $\lambda$. 
-\end{dfn} 
+\begin{exem}\label{exemple1}
+On pose $v$ et $v'$ deux variances, les formules du $\mu$-calcul d'ordre supérieur suivantes sont syntaxiquement correctes et ont les variables libres et liées suivantes :
+\begin{itemize}
+	\item $(\lambda X^{v} : \bullet \ . \ X) \wedge X$, dans cette formule, il y a deux variables qui portent le même nom, $X$, la variable $X$ dans la sous-formule entre parenthèses est liée par l'opérateur $\lambda$ tandis que l'autre variable $X$ apparaissant à la droite de l'opérateur $\wedge$ est libre. On pourrait réécrire cette formule de cette manière : $(\lambda Y^{v} : \bullet \ . \ Y) \wedge X$ où $Y$ serait liée et $X$ libre. 
+	\item $\mu X : \bullet \ . \  X$ possède une seule variable liée (par $\mu$), $X$ et aucune variable libre.
+	\item $\mu X : \bullet \ . \  \neg X$ possède une seule variable liée (par $\mu$), $X$ et aucune variable libre.
+	\item $\mu X : \bullet \ . \  ((\lambda Y^{v} : \bullet \ . \ \neg Y)X)$ possède deux variables liées, $X$ (par $\mu$) et $Y$ (par $\lambda$) et aucune variable libre.
+	\item $\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \  \lambda X^{v} : \bullet \ . \ F (\neg (F X))$ possède deux variables liées, $F$ (par $\mu$) et $X$ (par $\lambda$) et aucune variable libre.
+	\item $(\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \ \lambda X^{v} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y$ possède deux variables liées, $F$ (liée par $\mu$) et $X$ (liée par $\lambda$) et une variable libre, $Y$.
+	\item $\mu X : \bullet \ . \ [a]X$ possède une seule variable liée, $X$ (par $\mu$). Cette formule représente le fait que tout chemin composé de $a$-transitions est fini.
+\end{itemize}
 
-\begin{exem}
-A faire	
+Toutes ces formules sont syntaxiquement correctes, mais nous verrons par la suite que certaines d'entre-elles ne sont pas bien formées à cause notamment des variances. 
 \end{exem}
 
 \subsection{Variances\label{sec:variances}}
 
-On peut voir la variance comme la monotonie de la fonction représentée par la variable ou la formule (rappelons que les formules sont d'ordre supérieur). On peut voir une variance $none$ comme une fonction constante et une variable $any$ comme une fonction quelconque. Les variables avec les autres variances sont des fonctions monotones, croissantes pour les variables avec les variances $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$ et $\varnothing$, décroissantes pour les variables avec les variances duales de ces dernières ($\overline{\{\sqcap, \sqcup\}}$, $\overline{\{\sqcap\}}$, $\overline{\{\sqcup\}}$ et $\overline{\varnothing}$).    
+Avant de parler de variance, rappelons la définition d'un treillis. 
 
-\begin{dfn}[Valeurs des variances] Une variance $v$ peut prendre ici une des dix valeurs suivantes : $none$, $any$, $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$, $\varnothing$, $\overline{\{\sqcap, \sqcup\}}$, $\overline{\{\sqcap\}}$, $\overline{\{\sqcup\}}$ ou $\overline{\varnothing}$.
+\begin{dfn} [Treillis] Un treillis est un triplet (E, $\sqcap$, $\sqcup$) où E est un ensemble partiellement ordonné tel que tout couple d'éléments de E possède une borne supérieure et une borne inférieure. $\sqcap$ et $\sqcup$ sont les deux lois internes de E définies de la manière suivante : soient $e$ et $e'$ deux éléments de E, $e \sqcap e' = inf(e,\ e')$ et $e \sqcup e' = sup(e,\ e')$.
 \end{dfn}
 
-L'algorithme de model-checking pour le $\mu$-calcul polyadique d'ordre 1 possède une complexité en EXPTIME, mais dans le cas où toutes les variance présentes dans tous les types $\tau$ présents dans les opérateurs ${\mu X : \tau . \Phi}$ remplissent une certaine propriété, alors il existe un algorithme de model-checking qui résout le problème avec une complexité de PSPACE \citep{lange2014model}, d'où l'intérêt de regarder les variances des variables dans les formules lors de la phase de typage. 
+La variance d'une fonction ${f : \text{A} \rightarrow \text{B}}$, où A et B sont deux treillis, généralise et étend la notion de monotonie. Par exemple, une fonction de variance $none$ est une fonction constante (à la fois croissante et décroissante) et une fonction avec une variance $any$ est une fonction quelconque. Les fonctions avec les autres variances sont des fonctions monotones, croissantes pour les variances $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$ et $\varnothing$, décroissantes pour les variances duales de ces dernières ($\overline{\{\sqcap, \sqcup\}}$, $\overline{\{\sqcap\}}$, $\overline{\{\sqcup\}}$ et $\overline{\varnothing}$).    
 
-Une propriété importante des variance est l'additivité. 
+\begin{dfn}[Valeurs des variances] Une variance $v$ peut prendre ici une des dix valeurs suivantes : $none$, $any$, $\{\sqcap, \sqcup\}$, $\{\sqcap\}$, $\{\sqcup\}$, $\varnothing$, $\overline{\{\sqcap, \sqcup\}}$, $\overline{\{\sqcap\}}$, $\overline{\{\sqcup\}}$ ou $\overline{\varnothing}$.
+\end{dfn} 
 
-\begin{dfn}[$\sqcap$-additivité et $\sqcup$-additivité] Une fonction $f$ : A $\rightarrow$ B est $\sqcap$-additive (resp $\sqcup\text{-additive}$) si $\forall x, y \in$ A$^2$, $f(x \sqcap y) = f(x) \sqcap f(y)$ (resp $f(x \sqcup y) = f(x) \sqcup f(y)$).
+Une propriété importante caractérisée par les variances est l'additivité. 
+
+\begin{dfn}[$\sqcap$-additivité et $\sqcup$-additivité] Soient (A, $\sqcap$, $\sqcup$) et (B, $\sqcap$, $\sqcup$) deux treillis. Une fonction $f$ : A $\rightarrow$ B est $\sqcap$-additive (resp $\sqcup\text{-additive}$) si $\forall x, y \in$ A$^2$, $f(x \sqcap y) = f(x) \sqcap f(y)$ (resp $f(x \sqcup y) = f(x) \sqcup f(y)$).
+\end{dfn}
+
+Énonçons maintenant la définition de variance d'une fonction. 
+
+\begin{dfn} [Variance d'une fonction] Soient (A, $\sqcap$, $\sqcup$) et (B, $\sqcap$, $\sqcup$) deux treillis et $f$ : A $\rightarrow$ B une fonction : 
+\begin{itemize}
+	\item si $f$ est monotone, $\sqcap$-additive et $\sqcup$-additive, alors elle possède la variance $\{\sqcap, \sqcup\}$ ;
+	\item si $f$ est monotone et $\sqcap$-additive, alors elle possède la variance $\{\sqcap\}$ ;
+	\item si $f$ est monotone et $\sqcup$-additive, alors elle possède la variance $\{\sqcup\}$ ;
+	\item si $f$ est monotone, alors elle possède la variance $\varnothing$ ;
+	\item si la fonction $\neg f$ définie par $(\neg f)(x) = \neg f(x)$ possède la variance $v$, alors $f$ possède la variance $\overline{v}$ ;
+	\item si $f$ est constante, alors elle possède la variance $none$ ;
+	\item $f$ possède toujours la variance $any$ quelque soit sa définition.
+\end{itemize}
+\label{var:def}
 \end{dfn}
 
 \begin{figure}[ht]
@@ -170,30 +200,20 @@ Une propriété importante des variance est l'additivité.
   \label{figure:treillis des variances}
 \end{figure}
 
-\begin{dfn} [$\preccurlyeq$] On utilise le symbole $\preccurlyeq$ pour représenter la relation d'ordre partielle donnée par le treillis des variances (figure \ref{figure:treillis des variances}) dans lequel $any$ est le plus petit élément et $none$ le plus grand. Soit deux variances $v$ et $v'$, on note $v \preccurlyeq v'$ si $v$ et $v'$ sont comparables et que $v$ est plus petite que (ou égale à) $v'$ selon le treillis. 
+\begin{dfn} [$\preccurlyeq$] On utilise le symbole $\preccurlyeq$ pour représenter la relation d'ordre partielle donnée par le treillis des variances (figure \ref{figure:treillis des variances}) dans lequel $any$ est le plus petit élément et $none$ le plus grand. Soient deux variances $v$ et $v'$, on note $v \preccurlyeq v'$ si $v$ et $v'$ sont comparables et que $v$ est plus petite que (ou égale à) $v'$ selon le treillis. 
 \end{dfn}
 
-\begin{notat} [$v_1 \wedge v_2$] On note $v_1 \wedge v_2 = v$ la plus grande variance $v$ telle que $v \preccurlyeq v_1$ et $v \preccurlyeq v_1$. Par exemple, $\{\sqcap, \sqcup\} \wedge \{\sqcap\} = \{\sqcap\}$, $\{\sqcap\} \wedge \{\sqcup\} = \varnothing$ et $\overline{\{\sqcap, \sqcup\}} \wedge \{\sqcap\} = any$.
+\begin{notat} [$v_1 \wedge v_2$] On note $v_1 \wedge v_2 = v$ la plus grande variance $v$ telle que $v \preccurlyeq v_1$ et $v \preccurlyeq v_2$. Par exemple, $\{\sqcap, \sqcup\} \wedge \{\sqcap\} = \{\sqcap\}$, $\{\sqcap\} \wedge \{\sqcup\} = \varnothing$ et $\overline{\{\sqcap, \sqcup\}} \wedge \{\sqcap\} = any$.
 \end{notat}
 
-La variance possède également plusieurs propriétés. 
+Après avoir défini la variance d'une fonction, définissons maintenant la variance d'une variable. 
 
-\begin{dfn} [Propriétés de la variance] Soit $v$ une variance et $f$ : A $\rightarrow$ B une fonction : 
-\begin{itemize}
-	\item si $f$ est monotone, $\sqcap$-additive et $\sqcup$-additive, alors elle possède la variance $v = \{\sqcap, \sqcup\}$ ;
-	\item si $f$ est monotone et $\sqcap$-additive, alors elle possède la variance $v = \{\sqcap\}$ ;
-	\item si $f$ est monotone et $\sqcup$-additive, alors elle possède la variance $v = \{\sqcup\}$ ;
-	\item si $f$ est monotone, alors elle possède la variance $v = \varnothing$ ;
-	\item si la fonction $\neg f$ définie par $(\neg f)(x) = \neg f(x)$ possède la variance $v$, alors $f$ possède la variance $\overline{v}$ ;
-	\item si $f$ est constante, alors elle possède la variance $none$ ;
-	\item $f$ possède toujours la variance $any$ quelque soit sa définition.
-\end{itemize}
-\label{var:prop}
+\begin{dfn} [Variance d'une variable] Soient A$_i$, $i \in \{1, \ldots, n\}$, et B des treillis et ${f : \text{A}_1 \times \ldots \times \text{A}_n \rightarrow \text{B}}$ une fonction de $n$ variables. Pour chaque ${\textbf{a} = (a_1, \ldots, a_{i-1}, a_{i+1}, \ldots, a_n)}$, on peut définir une fonction $f_{\textbf{a}} : \text{A}_i \rightarrow \text{B}$ telle que ${f_{\textbf{a}}(x) = (a_1, \ldots, a_{i-1}, x, a_{i+1}, \ldots, a_n)}$. Soit $v_{\textbf{a}}$ la variance de $f_{\textbf{a}}$, on dit que la variable $x_i$ de $f$ a la variance ${v = \bigwedge \{v_{\textbf{a}} \mid \textbf{a} \in \text{A}_1 \times \ldots \times \text{A}_{i-1} \times \text{A}_{i+1} \times \ldots \times \text{A}_n\}}$.
 \end{dfn}
 
 Les variances possèdent aussi les deux opérations suivantes, le dual et la composition.  
 
-\begin{dfn} [Dual d'une variance] Le dual d'une variance $v$, noté $dual(v)$ est défini de la façons suivante : 
+\begin{dfn} [Dual d'une variance] Le dual d'une variance $v$, noté $dual(v)$ est défini de la façon suivante : 
 \[dual(v) = \left\{
 \begin{array}{ll}
 v & \text{si }v \in \{any, none, \varnothing, \{\sqcap, \sqcup\}\}\\
@@ -203,7 +223,7 @@ v & \text{si }v \in \{any, none, \varnothing, \{\sqcap, \sqcup\}\}\\
 \end{array}\right.\]
 \end{dfn}
 
-\begin{dfn} [Composition de deux variances] La composition de deux variances $v_1$ et $v_2$, notée $v_1 \circ v_2$ est définie de la façons suivante : 
+\begin{dfn} [Composition de deux variances] La composition de deux variances $v_1$ et $v_2$, notée $v_1 \circ v_2$ est définie de la façon suivante : 
 \[v_1 \circ v_2 = \left\{
 \begin{array}{ll}
 none & \text{si }none \in \{v_1, v_2\}\\
@@ -217,38 +237,20 @@ dual(\overline{v_1}) \cap \overline{v_2} & \text{si }\overline{v_1}, \overline{v
 
 On peut faire les trois observations suivantes :
 \begin{itemize}
-	\item Si une fonction $f$ possède une variance $v_2$ et qu'il existe une variance $v_1$ telle que $v_1 \preccurlyeq v_2$, alors $f$ possède aussi la variance $f$.
+	\item Si une fonction $f$ possède une variance $v_2$ et qu'il existe une variance $v_1$ telle que $v_1 \preccurlyeq v_2$, alors $f$ possède aussi la variance $v_1$.
 	\item Si une fonction $f$ : A $\rightarrow$ B possède une variance $v$, alors la fonction $dual(f)$ : A $\rightarrow$ B telle que $(dual(f))(x) = \neg f(\neg x)$ possède la variance $dual(v)$.
 	\item Soient deux fonctions $f_1$ : B $\rightarrow$ C et $f_2$ : A $\rightarrow$ B, si $f_1$ possède la variance $v_1$ et $f_2$ possède la variance $v_2$, alors $f_1 \circ f_2$ possède la variance $v_1 \circ v_2$.
 \end{itemize}
 
-\begin{exem}
-Exemples de calculs et du formules valides et non valides à cause de la variance (cf papier).
-\end{exem}
-
 L'algorithme de model-checking pour le $\mu$-calcul polyadique d'ordre 1 possède une complexité en EXPTIME, mais dans le cas où toutes les variances présentes dans tous les types $\tau$ présents dans les opérateurs ${\mu X : \tau . \Phi}$ sont additives, alors il existe un algorithme de model-checking qui résout le problème avec une complexité de PSPACE \citep{lange2014model}, d'où l'intérêt de regarder les variances des variables dans les formules lors de la phase de typage. 
 
-\subsection{Règles de typage\label{regles}}
+\subsection{Système de typage\label{syst typage}}
 
-Maintenant que l'on a vu la syntaxe du $\mu$-calcul d'ordre supérieur et que l'on a introduit les variances, il ne nous reste plus que à définir un système de typage pour pouvoir énoncer les règles de typage du $\mu$-calcul d'ordre supérieur qui ont été utilisées pour faire l'algorithme de typage décrit en section \ref{algos}. En effet, afin de pouvoir utiliser la récursivité, il a fallu réécrire les règles de typage présentes dans l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model} et introduire une nouvelle notion, l'environnement de typage sans variances. 
+Maintenant que l'on a vu la syntaxe du $\mu$-calcul d'ordre supérieur et présenté les variances, il nous reste encore à décrire le système de typage du $\mu$-calcul d'ordre supérieur.
 
-\begin{dfn} [Système de typage] Un système de typage est un système logique qui comprend des règles qui attribuent un type aux variables et aux formules d'un langage. Ici on attribuera aussi une variance aux variables. 
-\end{dfn}
+Un système de typage est un système logique qui comprend des règles qui attribuent un type aux variables et aux formules d'un langage. Ici on attribuera aussi une variance aux variables. 
 
-\begin{dfn} [Jugement de typage] Un jugement de typage, noté $\Delta : \Phi \vdash (\Gamma, \tau)$ est un triplet où $\Delta$ est un environnement de typage sans variances, $\Phi$ une formule du $mu$-calcul d'ordre supérieur, $\Gamma$ un environnement de typage et $\tau$ un type. Cela signifie que dans un contexte qui remplit toutes les variables libres de $\Phi$ présentes dans $\Delta$ ont les types qui leur sont attribués dans $\Delta$, alors $\Phi$ a le type $\tau$ et l'on se trouve dans l'environnement de typage $\Gamma$ (les variables libres de $\Phi$ ont les types et variances décrits dans $\Gamma$).    
-\end{dfn}
-
-Dans la suite on utilisera la notation $type(\Delta, \Phi) = (\Gamma, \tau)$ pour ${\Delta : \Phi \vdash (\Gamma, \tau)}$ afin de faciliter l'implémentation.
-
-On va maintenant définir les notions d'environnement de typage sans variances, de type et d'environnement de typage. On a introduit la notion d'environnement de typage sans variances pour pouvoir utiliser des règles de typage récursives. En effet, comme on accepte les formules d'ordre supérieur, si l'on ne connaît pas le type des variables libres à l'avance, on n'a pas de cas de base autre que $\top$ pour pouvoir effectuer la récurrence alors qu'il faudrait aussi avoir les variables étant donné qu'elles ne peuvent pas non plus se décomposer en d'autres formules.
-
-\begin{dfn} [Environnement de typage sans variances $\Delta$] Un environnement de typage sans variances, noté $\Delta$ est un ensemble d'assignements de typage sans variance de la forme ${X : \tau}$ où $X$ est une variable et $\tau$ son type (qui peut être de la forme $\bullet$ ou ${\tau_1^{v_1} \rightarrow \tau_2}$).  
-\end{dfn}
-
-\begin{notat} [$vars(\Delta$)] Soit un environnement de typage sans variances ${\Delta = \{X_1 : \tau_1, \ldots, X_n : \tau_n\}}$, on note ${vars(\Delta) = \{X_1, \ldots, X_n\}}$ l'ensemble des variables présentes dans $\Delta$.
-\end{notat}
-
-\begin{dfn}[Type] Le type d'une variable ou d'une formule peut prendre deux formes. Il peut être soit un type de base (comme un booléen, cela dépend du langage mais n'a pas d'importance ici), on le note alors $\bullet$, soit un type $\rightarrow$ représentant une fonction, on le note alors $\tau_1^{v} \rightarrow \tau_2$ avec $v$, une variance et $\tau_1$ et $\tau_2$, deux types quelconques. 
+\begin{dfn}[Type] Le type d'une variable ou d'une formule peut prendre deux formes. Il peut être soit un type de base (ici il s'agit du type des prédicats, $2^{\text{Pr}}$), on le note alors $\bullet$, soit un type $\rightarrow$ représentant une fonction, on le note alors $\tau_1^{v} \rightarrow \tau_2$ avec $v$, une variance, et $\tau_1$ et $\tau_2$, deux types quelconques. 
 \end{dfn}
 
 \begin{dfn} [Environnement de typage $\Gamma$] Un environnement de typage, noté $\Gamma$ est un ensemble d'assignements de typage de la forme ${X^v : \tau}$ où $X$ est une variable, $v$ sa variance et $\tau$ son type (qui peut être de la forme $\bullet$ ou ${\tau_1^{v_1} \rightarrow \tau_2}$). \\ 
@@ -258,33 +260,68 @@ On note $\emptyset$ l'environnement de typage vide.
 \begin{notat} [$vars(\Gamma$)] Soit un environnement de typage ${\Gamma = \{X_1^{v_1} : \tau_1, \ldots, X_n^{v_n} : \tau_n\}}$, on note ${vars(\Gamma) = \{X_1, \ldots, X_n\}}$ l'ensemble des variables présentes dans $\Gamma$.
 \end{notat}
 
+\begin{dfn} [Jugement de typage] Un jugement de typage, noté ${\Gamma : \Phi \vdash \tau}$ est un triplet où $\Gamma$ est un environnement de typage, $\Phi$ une formule du $\mu$-calcul d'ordre supérieur et $\tau$ un type. Cela signifie que lorsque toutes les variables libres de $\Phi$ ont le type et la variance qui leur sont attribués dans $\Gamma$, alors $\Phi$ a le type $\tau$. ${\Gamma : \Phi \vdash \tau}$ est dérivable à partir de règles de typage.
+\end{dfn}
+
+Les règles de typage qui permettent de dériver ${\Gamma : \Phi \vdash \tau}$ sont présentées dans l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model}. Ces règles permettent de dériver des jugements de typage avec des formules du $\mu$-calcul polyadique d'ordre supérieur mais on peut les appliquer sur des jugements de typage avec des formules du $\mu$-calcul d'ordre supérieur en ignorant les opérateurs polyadiques. 
+
+Ces règles de typage permettent également de dire que certaines formules ne sont pas correctes à cause des variances, notamment la règle du $\mu$ qui indique que la variance $v$ de la variable liée par l'opérateur $\mu$ doit respecter $v \succcurlyeq \varnothing$.
+
+\begin{exem}\label{exemple2}
+En appliquant les règles de typage de l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model} sur les formules de l'exemple \ref{exemple1}, on obtient ce qui suit en terme de validité :
+\begin{itemize}
+	\item $(\lambda X^{v} : \bullet \ . \ X) \wedge X$ : non valide. 
+	\item $\mu X : \bullet \ . \  X$ : valide.
+	\item $\mu X : \bullet \ . \  \neg X$ : non valide.
+	\item $\mu X : \bullet \ . \  ((\lambda Y^{v} : \bullet \ . \ \neg Y)X)$ : non valide.
+	\item $\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \  \lambda X^{v} : \bullet \ . \ F (\neg (F X))$ : valide.
+	\item $(\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \ \lambda X^{v} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y$ : valide.
+	\item $\mu X : \bullet \ . \ [a]X$ : valide.
+\end{itemize}
+\end{exem}
+
+\section{Règles d'inférence de variances\label{regles}}
+
+Maintenant que l'on a fini d'exposer le contexte, on peut se concentrer sur le problème traité par ce TER, l'inférence de variances. L'inférence de variances est le problème qui consiste, étant donné un environnement de typage sans variance et une formule du $\mu$-calcul d'ordre supérieur, à compléter cet environnement de typage avec les variances des variables et à donner le type de la formule. Le jugement de typage ainsi obtenu doit alors être dérivable à partir des règles de typage de l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model}.
+
+Pour résoudre ce problème, nous allons utiliser un algorithme d'inférence décrit en section \ref{algos}. Nous allons dans cette section définir une fonction récursive $type(.)$ qui représente cet algorithme et est décrite par des règles d'inférence. 
+
+\begin{dfn} [Environnement de typage sans variances $\Delta$] Un environnement de typage sans variances, noté $\Delta$ est un ensemble d'assignements de typage sans variance de la forme ${X : \tau}$ où $X$ est une variable et $\tau$ son type (qui peut être de la forme $\bullet$ ou ${\tau_1^{v_1} \rightarrow \tau_2}$).  
+\end{dfn}
+
+\begin{notat} [$vars(\Delta$)] Soit un environnement de typage sans variances ${\Delta = \{X_1 : \tau_1, \ldots, X_n : \tau_n\}}$, on note ${vars(\Delta) = \{X_1, \ldots, X_n\}}$ l'ensemble des variables présentes dans $\Delta$.
+\end{notat}
+
 \begin{rema}
 Un environnement de typage sans variances est un environnement de typage sans les variances des variables. Les indications de variance à l'intérieur des types $\rightarrow$ restent néanmoins toujours présentes. 
 \end{rema}
 
-Dans les règles de typage, on va avoir besoin de pouvoir composer une variance avec les variances de toutes les variables présentes dans un environnement de typage et de pouvoir combiner deux environnements de typage d'où les deux définitions suivantes.
+\begin{dfn} [Fonction d'inférence de variances] Soient $\Delta$ un environnement de typage sans variances, $\Phi$ une formule du $\mu$-calcul d'ordre supérieur, $\Gamma$ un environnement de typage et $\tau$ un type. La fonction d'inférence $type(\Delta, \Phi) = (\Gamma, \tau)$ est une fonction qui prend en entrée $\Delta$ et $\Phi$ et retourne $\Gamma$ qui est en fait $\Delta$ complété avec les variances des variables et $\tau$, le type de $\Phi$ sous les hypothèses de $\Gamma$. 
+\end{dfn}
 
-\begin{dfn} [Composition variance environnement de typage] Soit un environnement de typage ${\Gamma = \{X_1^{v_1} : \tau_1, \ldots, X_n^{v_n} : \tau_n\}}$ et une variance $v$, on défini la composition de $v$ avec $\Gamma$, notée ${v \circ \Gamma}$ de la manière suivante : 
+$type(.)$ est une fonction récursive définie par des règles d'inférence de variances. Dans ces règles, on va avoir besoin de pouvoir composer une variance avec les variances de toutes les variables présentes dans un environnement de typage et de pouvoir combiner deux environnements de typage d'où les deux définitions suivantes.
+
+\begin{dfn} [Composition variance environnement de typage] Soit un environnement de typage ${\Gamma = \{X_1^{v_1} : \tau_1, \ldots, X_n^{v_n} : \tau_n\}}$ et une variance $v$, on définit la composition de $v$ avec $\Gamma$, notée ${v \circ \Gamma}$ de la manière suivante : 
 \begin{center}
 ${v \circ \Gamma} := {\Gamma = \{X_1^{v \, \circ \, v_1} : \tau_1, \ldots, X_n^{v \, \circ \, v_n} : \tau_n\}}$.
 \end{center}
 \end{dfn}
 
-\begin{dfn} [Combinaison de deux environnements de typage] Soient deux environnements de typage, $\Gamma_1$ et $\Gamma_2$, $v$, $v_1$, $v_2$ des variances et $\tau$, $\tau_1$, $\tau_2$ des types, on défini la combinaison de $\Gamma_1$ et $\Gamma_2$, notée ${\Gamma_1 \wedge \Gamma_2}$ comme étant un environnement de typage construit de la manière suivante : 
+\begin{dfn} [Combinaison de deux environnements de typage] Soient deux environnements de typage, $\Gamma_1$ et $\Gamma_2$, $v$, $v_1$, $v_2$ des variances et $\tau$, $\tau_1$, $\tau_2$ des types, on définit la combinaison de $\Gamma_1$ et $\Gamma_2$, notée ${\Gamma_1 \wedge \Gamma_2}$ comme étant un environnement de typage construit de la manière suivante : 
 \begin{itemize}
 	\item si $(X^v : \tau) \in \Gamma_1$ et $X \notin vars(\Gamma_2)$, alors $(X^v : \tau) \in {\Gamma_1 \wedge \Gamma_2}$ ;
 	\item si $X \notin vars(\Gamma_1)$ et $(X^v : \tau) \in \Gamma_2$, alors $(X^v : \tau) \in {\Gamma_1 \wedge \Gamma_2}$ ;
 	\item si $(X^{v_1} : \tau_1) \in \Gamma_1$ et $(X^{v_2} : \tau_2) \in \Gamma_2$, alors : 
 	\begin{itemize}
 		\item si $\tau_1 \neq \tau_2$, alors ${\Gamma_1 \wedge \Gamma_2}$ n'est pas défini ;
-		\item sinon, si $\tau_1 = \tau_2$, alors $(X^{v_1 \, \wedge \, v_2} : \tau_1) \in {\Gamma_1 \wedge \Gamma_2}$.
+		\item sinon, c'est-à-dire si $\tau_1 = \tau_2$, alors $(X^{v_1 \, \wedge \, v_2} : \tau_1) \in {\Gamma_1 \wedge \Gamma_2}$.
 	\end{itemize}
 \end{itemize}
 \end{dfn}
 
-On peut maintenant énoncer les règles de typage du du $\mu$-calcul d'ordre supérieur.
+On peut maintenant énoncer les règles d'inférence de variances du $\mu$-calcul d'ordre supérieur qui composent la fonction $type(.)$.
 
-\begin{dfn} [Règles de typage] Les règles de typage du $\mu$-calcul d'ordre supérieur sont les suivantes :
+\begin{dfn} [Règles de typage] Les règles d'inférence de variances du $\mu$-calcul d'ordre supérieur sont les suivantes :
 \begin{center}
 $\inferrule
 { }
@@ -328,8 +365,8 @@ $ $
 $ $
 \\
 $\inferrule
-{type(\Delta\cup\{X:\sigma\},\Phi)=(\Gamma,\tau) \\ \Gamma=\Gamma'\cup\{X^{v}: \sigma'\}}
-{type(\Delta,\lambda X : \sigma \: . \: \Phi)= (\Gamma',\sigma'^{v} \rightarrow \tau)}(\textsc{T-lamdda})$
+{type(\Delta\cup\{X:\sigma\},\Phi)=(\Gamma,\tau) \\ \Gamma=\Gamma'\cup\{X^{v'}: \sigma'\} \\ v \preccurlyeq v'}
+{type(\Delta,\lambda X^{v} : \sigma \: . \: \Phi)= (\Gamma',\sigma'^{v} \rightarrow \tau)}(\textsc{T-lamdda})$
 \\
 $ $
 \\
@@ -343,24 +380,125 @@ $ $
 \end{center}
 \end{dfn}
 
-Avant d'expliquer plus en détail ces règles de typage, on peut remarquer que l'on doit connaître à l'avance le type des variables libres de la formule avec leurs informations de variances. Connaître le type de ces variables est possible avec une version annotée du $\mu$-calcul d'ordre supérieur mais connaître les informations de variance de ces types est une hypothèse plus compliquée à mettre en pratique. 
+Avant d'expliquer plus en détail ces règles d'inférence de variances, on peut remarquer que l'on doit connaître à l'avance le type des variables libres de la formule avec leurs informations de variances. Connaître le type de ces variables est possible avec une version annotée du $\mu$-calcul d'ordre supérieur mais connaître les informations de variance de ces types est une hypothèse plus compliquée à mettre en pratique. 
 
-Donnons maintenant quelques explications sur ces règles de typage .
+Donnons maintenant quelques explications à propos de ces règles de typage.
 \begin{itemize}
 	\item (\textsc{T-top}) : axiome.
 	\item (\textsc{T-et}) : $\Phi$ et $\Gamma$ doivent être des types $\bullet$ car la conjonction d'une fonction avec un type de base ou de deux fonctions n'a aucun sens. On obtient un environnement de typage qui combine les environnements de typage de $\Phi$ et $\Gamma$ et donc qui interdit de se retrouver avec une même variable possédant deux types différents et qui adapte si besoin la variance d'une variable à la plus grande variance commune.
-	\item (\textsc{T-neg}) : Le type de $\Phi$ ne change pas avec le passage à la négation, mais les variables de l'environnement de typage de $\Phi$ voient toutes leur variance passer de $v$ à $\overline{v}$ après le passage à la négation. Que le type ne change pas semble naturel, pour la variance, c'est en accord avec la 5$^e$ propriété de la définition \ref{var:prop} de la section \ref{sec:variances}.
-	\item (\textsc{T-diamant}) : Le type de $\Phi$ ne change pas avec l'intervention du $\diamond$, mais les variables de l'environnement de typage de $\Phi$ voient toutes leur variance passer de $v$ à $\sqcup \circ v$ après l'intervention du $\diamond$. Ce dernier point met à jour les propriétés d'additivité des variances des variables de $\Phi$ en supprimant la $\sqcap$-additivité éventuelle de ces dernière. On peut voir cette règle comme un cas de (\textsc{T-app}) où $\langle a \rangle$ serait une fonction appliquée à $\Phi$ avec une variance de $\{\sqcup\}$.
+	\item (\textsc{T-neg}) : Le type de $\Phi$ ne change pas avec le passage à la négation, mais les variables de l'environnement de typage de $\Phi$ voient toutes leur variance passer de $v$ à $\overline{v}$. Que le type ne change pas semble naturel, pour la variance, c'est en accord avec la 5$^e$ propriété de la définition \ref{var:def} de la section \ref{sec:variances}.
+	\item (\textsc{T-diamant}) : Le type de $\Phi$ ne change pas avec l'intervention du $\diamond$, mais les variables de l'environnement de typage de $\Phi$ voient toutes leur variance passer de $v$ à $\sqcup \circ v$. Ce dernier point met à jour les propriétés d'additivité des variables de $\Phi$ en supprimant la $\sqcap$-additivité éventuelle de ces dernières. On peut voir cette règle comme un cas de (\textsc{T-app}) où $\langle a \rangle$ serait une fonction appliquée à $\Phi$ avec une variance de $\{\sqcup\}$.
 	\item (\textsc{T-var}) : On conserve le type de $X$ donné par $\Delta$ et on assigne à $X$ la variance $\{\sqcap, \sqcup\}$ quelque soit ce type car il s'agit de la plus grande variance que $X$ est autorisée à prendre selon les règles de \citep{lange2014model}, par récursivité, les autres règles permettront de réduire cette variance si besoin, on évite ainsi les erreurs dues au fait d'avoir choisi une variance plus petite que ce qui était possible. On rappelle que le but est de trouver la plus grande variance possible pour chaque variable libre.
-	\item (\textsc{T-mu}) : On impose le fait que la variance $v$ de $X$ doit être respecter $v \succcurlyeq \varnothing$. En effet, si la fonction décrite par $X$ est croissante (ou constante), on est sûr de bien obtenir un point fixe et c'est ce que vérifie le fait d'avoir une variance $v \succcurlyeq \varnothing$. Que le type du résultat soit le type de $X$ est une application de la définition du point fixe ($x = f(x)$).
-	\item (\textsc{T-lambda}) : On rajoute temporairement $X$ dans $\Delta$ avec  le type indiqué dans la formule pour trouver sa variance pour pouvoir l'indiquer dans le type du résultat. On en a aussi besoin de la rajouter pour typer $Phi$. Une fois cela fait, on retire $X$ de l'environnement de typage du résultat. 
+	\item (\textsc{T-mu}) : On impose le fait que la variance $v$ de $X$ doit respecter $v \succcurlyeq \varnothing$. En effet, si la fonction décrite par $X$ est croissante (ou constante), on est sûr de bien obtenir un point fixe et c'est ce que vérifie le fait d'avoir une variance $v \succcurlyeq \varnothing$. Que le type du résultat soit le type de $X$ est une application de la définition du point fixe ($x = f(x)$).
+	\item (\textsc{T-lambda}) : On rajoute temporairement $X$ dans $\Delta$ avec  le type indiqué dans la formule pour trouver sa variance afin de vérifier qu'elle est compatible avec les informations indiquées par la syntaxe pour $X$. On a aussi besoin de la rajouter pouvoir typer $\Phi$. Une fois cela fait, on retire $X$ de l'environnement de typage du résultat. La variance indiquée par le type $\rightarrow$ du résultat est celle indiquée par la syntaxe pour éviter d'imposer plus de conditions sur $X$ que nécessaire. 
 	\item (\textsc{T-app}) : On vérifie que le type de $\Psi$ est bien celui de l'antécédent de $\Phi$, et on donne au résultat de l'application le type de l'image de $\Phi$. Au niveau des variances, on compose la variance de l'antécédent de $\Psi$ avec les variances de l'environnement de typage de $\Phi$ pour être en accord avec les informations de typage dans le type de l'antécédent de $\Phi$ avant de combiner les environnements de typage de $\Phi$ et $\Psi$ pour obtenir celui du résultat. 
 \end{itemize}
 
-\begin{exem}
-Dans cet exemple, on va noter $\tau = \bullet^{\varnothing} \rightarrow \bullet$.
+\begin{exem}\label{exemple3}
+Dans cet exemple, nous allons appliquer les règles ci-dessus aux formules de l'exemple \ref{exemple1} pour vérifier que l'on retrouve bien les validités de l'exemple \ref{exemple2}.\\
 
-On va chercher à typer la formule $(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X))))) \ [b] Y$ à partir de ${\Delta = \{\{Y : \bullet\}\}}$.
+$\ast$ Commençons par la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X}$ avec ${\Delta = \{\{X : \bullet\}\}}$. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}).
+
+\[\inferrule
+{\inferrule{\inferrule{ }{type(\Delta', X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)}(\textsc{T-var})}
+{type(\emptyset, \lambda X^{\varnothing} : \bullet \ . \ X)=(\emptyset ,\bullet^{\varnothing} \rightarrow \bullet)} (\textsc{T-lambda})
+ \inferrule{ }{type(\Delta, X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)} (\textsc{T-var})}
+{type(\Delta, (\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X)= \text{"Erreur : } \lambda X^{\varnothing} : \bullet \ . \ X \text{ n'a pas le type } \bullet \text{!"}}(\textsc{T-et})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X}$ n'est pas valide. \\
+
+$\ast$ Continuons avec la formule ${\mu X : \bullet \ . \  X}$. On prend 
+${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
+
+\[\inferrule
+{\inferrule{ }{type(\Delta', X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)}(\textsc{T-var})}
+{type(\Delta, \mu X : \bullet \ . \  X) = (\emptyset, \bullet)}
+(\textsc{T-mu})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  X}$ est valide. \\
+
+$\ast$ Poursuivons avec la formule ${\mu X : \bullet \ . \  \neg X}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
+
+\[\inferrule
+	{\inferrule
+		{\inferrule
+		{ }
+		{type(\Delta', X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)}
+		(\textsc{T-var}) 
+	}
+	{type(\Delta', \neg X)=(\{\{X^{\overline{\{\sqcap\}}} : \bullet\}\}, \bullet)}
+	(\textsc{T-neg})}
+	{type(\Delta, \mu X : \bullet \ . \  \neg X)= \text{"Erreur : la variance de } X \text{ est } {\overline{\{\sqcap, \sqcup\}}} \text{ qui n'est pas } \succcurlyeq \varnothing \text{!"}}
+	(\textsc{T-mu})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  \neg X}$ n'est pas valide. \\
+
+$\ast$ Regardons maintenant la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X)}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta_{X} = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}) et ${\Delta_{X, Y} = \{\{X : \bullet\}, \{Y : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}). 
+
+\[\inferrule
+{\inferrule
+{\inferrule
+{\inferrule
+{ }
+{type(\Delta_{X, Y}, Y)=(\{\{Y^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)}(\textsc{T-var})}
+{type(\Delta_{X, Y}, \ \neg Y)=(\{\{Y^{\overline{\{\sqcap, \sqcup\}}} : \bullet\}\}, \bullet)}(\textsc{T-neg})}
+{type(\Delta_{X}, \lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)=(\emptyset ,\bullet^{\overline{\varnothing}} \rightarrow \bullet)} (\textsc{T-lambda})
+ \inferrule{ }{type(\Delta, X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)} (\textsc{T-var})}
+{\inferrule{type(\Delta_{X}, ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y) X) = (\{\{X^{\overline{\varnothing}} : \bullet\}\},\bullet)}
+{type(\Delta, \mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X)))= \text{"Erreur : la variance de } X \text{ est } {\overline{\varnothing}} \text{ qui n'est pas } \succcurlyeq \varnothing \text{!"}}
+(\textsc{T-mu})}(\textsc{T-app})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X))}$ n'est pas valide. \\
+
+$\ast$ Étudions ensuite la formule ${\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \  \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X))}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta_{F} = \{\{F : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}) et ${\Delta_{F, X} = \{\{F : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}, \{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}). 
+
+On note (1) l'arbre suivant :
+
+\[\inferrule
+{ }
+{type(\Delta_{F, X}, F)=(\{\{F^{\{\sqcap, \sqcup\}} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}\},\bullet^{\overline{\varnothing}} \rightarrow \bullet)}
+(\textsc{T-var})
+\]
+
+On note (2) l'arbre suivant :
+
+\[\inferrule
+{\inferrule
+{ }
+{type(\Delta_{F, X}, F)=(\{\{F^{\{\sqcap, \sqcup\}} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}\},\bullet^{\overline{\varnothing}} \rightarrow \bullet)}
+(\textsc{T-var})
+\inferrule
+{ }
+{type(\Delta_{F, X}, X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)}
+(\textsc{T-var})}
+{\inferrule
+{type(\Delta_{F, X}, F X)=(\{\{F^{\{\sqcap, \sqcup\}} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}, \{X^{\overline{\varnothing}} : \bullet\}\},\bullet)}
+{type(\Delta_{F, X}, \neg (F X))=(\{\{F^{\overline{\{\sqcap, \sqcup\}}} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}, \{X^{\varnothing} : \bullet\}\},\bullet)}
+(\textsc{T-neg})}
+(\textsc{T-app})
+\]
+
+L'arbre de la formule est :
+
+\[\inferrule
+{\inferrule
+{\inferrule
+{(1) \qquad \qquad (2)}
+{type(\Delta_{F, X}, F (\neg (F X)))=(\{\{F^{\varnothing} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}, \{X^{\overline{\varnothing}} : \bullet\}\},\bullet)}
+(\textsc{T-app})}
+{type(\Delta_{F}, \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X)))=(\{\{F^{\varnothing} : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}\},\bullet^{\overline{\varnothing}} \rightarrow \bullet)}
+(\textsc{T-lambda})}
+{type(\Delta, \mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X)))=(\emptyset,\bullet^{\overline{\varnothing}} \rightarrow \bullet)}
+(\textsc{T-mu})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X))}$ est valide. \\
+
+$\ast$ On note ${\tau = \bullet^{\overline{\varnothing}} \rightarrow \bullet}$. On cherche ici à inférer les variances de la formule \\${(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X))))) \ [b] Y}$ à partir de ${\Delta = \{\{Y : \bullet\}\}}$.
 
 On va aussi noter les environnements de typage sans variables que nous serons amenés à utiliser de la manière suivante : \\ ${\Delta_{F, X} = \{\{F : \tau\}, \{X : \bullet\}\}}$; \\${\Delta_{Y, F, X} = \{\{Y : \bullet\}, \{F : \tau\}, \{X : \bullet\}\}}$; \\${\Delta_{Y, F} = \{\{Y : \bullet\}, \{F : \tau\}\}}$.\\
 
@@ -368,11 +506,11 @@ On note (1) l'arbre suivant :
 \[\inferrule
 {\inferrule{ }{type(\Delta_{F, X}, F)=(\{\{F^{\{\sqcap, \sqcup\}} : \tau\}\},\tau)}(\textsc{T-var}) \inferrule{ }{type(\Delta_{F, X}, X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},\bullet)} (\textsc{T-var})}
 {\inferrule
-{type(\Delta_{F, X}, F X) = (\{\{F^{\varnothing} : \tau\}, \{X^{\overline{\varnothing}} : \bullet\}\},\bullet)}
-{type(\Delta_{F, X}, \neg(F X)) = (\{\{F^{\overline{\varnothing}} : \tau\}, \{X^{\varnothing} : \bullet\}\},\bullet)}(\textsc{T-neg})}(\textsc{T-app})
+{type(\Delta_{F, X}, F X) = (\{\{F^{\{\sqcap, \sqcup\}} : \tau\}, \{X^{\overline{\varnothing}} : \bullet\}\},\bullet)}
+{type(\Delta_{F, X}, \neg(F X)) = (\{\{F^{\overline{\{\sqcap, \sqcup\}}} : \tau\}, \{X^{\varnothing} : \bullet\}\},\bullet)}(\textsc{T-neg})}(\textsc{T-app})
 \]
 
-On note (2) l'arbre suivant :
+On note (2) l'arbre suivant ($\bigstar$ : (\textsc{T-et})) :
 \[\inferrule 
 {\inferrule{ }
 	{type(\Delta, Y)=(\{\{Y^{\{\sqcap, \sqcup\}} : \bullet\}\},	\bullet)}
@@ -395,7 +533,7 @@ On note (2) l'arbre suivant :
 	(\textsc{T-mu})}
 	(\textsc{T-lambda})}
 (\textsc{T-diamant})}
-(\textsc{T-et})
+(\bigstar)
 \]
 
 On appelle (3) l'arbre suivant :
@@ -418,18 +556,41 @@ On appelle (3) l'arbre suivant :
 On peut maintenant construire l'arbre de la formule entière :
 \[\inferrule
 	{(2) \qquad \qquad (3)}
-	{type(\Delta, (\mu F : \tau \ . \ \lambda X^v : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X))))) \ [b] Y = (\{\{Y^{any} : \bullet\}\},\bullet)}
+	{type(\Delta, (\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y) = (\{\{Y^{any} : \bullet\}\},\bullet)}
 	(\textsc{T-app})
 \]
 
 On rappelle pour la dernière ligne de l'arbre (3) que $[b] Y ::= \neg \langle b \rangle \neg Y$. On remarque aussi que l'on rajoute $F$ et $X$ à $\Delta$ pour les étages du dessus lorsque l'on les rencontre dans les opérateurs $\mu$ et $\lambda$ de la formule bien qu'elles n'étaient pas présentes en-dessous. 
 
-Dans la dernière ligne de l'arbre, on se retrouve dans les hypothèses (arbres (2) et (3)) avec $Y$ qui a deux variances différentes, $\{\sqcup\}$ et $\{\sqcap\}$, pour trouver la variance finale de $Y$, on commence par calculer $\overline{\varnothing} \circ \{\sqcap\} = \overline{\varnothing}$ pour suivre la règle \textsc{T-app} avant de chercher la plus grande variance $v$ telle que $v \preccurlyeq \{\sqcup\}$ et $v \preccurlyeq \overline{\varnothing}$, selon le treillis des variances (figure \ref{figure:treillis des variances}), cette variable est $any$ d'où le résultat. 
+Dans la dernière ligne de l'arbre, on se retrouve dans les hypothèses (arbres (2) et (3)) avec $Y$ qui a deux variances différentes, $\{\sqcup\}$ et $\{\sqcap\}$, pour trouver la variance finale de $Y$, on commence par calculer $\overline{\varnothing} \circ \{\sqcap\} = \overline{\varnothing}$ pour suivre la règle \textsc{T-app} avant de chercher la plus grande variance $v$ telle que $v \preccurlyeq \{\sqcup\}$ et $v \preccurlyeq \overline{\varnothing}$, selon le treillis des variances (figure \ref{figure:treillis des variances}), cette variable est $any$ d'où le résultat. On retrouve bien le fait que la formule ${(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y}$ est valide.\\
+
+$\ast$ Pour terminer, regardons la formule ${\mu X : \bullet \ . \ [a]X}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
+
+\[\inferrule
+	{\inferrule
+		{\inferrule
+		{\inferrule
+		{\inferrule
+		{ }
+		{type(\Delta', X)=(\{\{X^{\{\sqcap, \sqcup\}} : \bullet\}\},	\bullet)}
+		(\textsc{T-var}) 
+	}
+	{type(\Delta', \neg X)=(\{\{X^{\overline{\{\sqcap, \sqcup\}}} : \bullet\}\},	\bullet)}
+	(\textsc{T-neg})}
+	{type(\Delta', \langle a \rangle (\neg X))=(\{\{X^{\overline{\{\sqcap\}}} : \bullet\}\},	\bullet)}
+	(\textsc{T-diamant})}
+	{type(\Delta', [a] X)=(\{\{X^{\{\sqcap\}} : \bullet\}\},	\bullet)}
+	(\textsc{T-neg})}
+	{type(\Delta, \mu X : \bullet \ . \ [a]X)=(\emptyset, \bullet)}
+	(\textsc{T-mu})
+\]
+
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \ [a]X}$ est valide.
 \end{exem}
 
 \section{Implémentation des règles de typage\label{algos}}
 
-L'implémentation de ces règles de typage a été réalisée en OCaml (on peut la trouver avec ce lien \url{https://github.com/CamilleBonnin/TER-S3-Typing-the-higher-order-polyadic-mu-calculus.git}). 
+L'implémentation de ces règles d'inférence de variances a été réalisée en OCaml (on peut la trouver avec ce lien \url{https://github.com/CamilleBonnin/TER-S3-Typing-the-higher-order-polyadic-mu-calculus.git}). 
 
 Cette implémentation reprend les parties suivantes du code écrites par Thomas Portet (\url{https://github.com/ThomasPortet/higher-order-mu-calculus}) :
 \begin{itemize}
@@ -441,13 +602,13 @@ Cette implémentation reprend les parties suivantes du code écrites par Thomas 
 
 Les algorithmes des fonctions de calcul des variances étant des applications directes des formules de calcul (la seule difficulté étant pour le calcul de $\wedge$ de tester les variances du sommet vers le bas du treillis), leurs algorithmes ne seront pas donnés ici. 
 
-On a choisi ici de représenter les environnements de typage (classiques comme sans variances) par des listes associatives, les fonctions de recherche, d'ajout ou de suppression d'un élément dans un environnement de typage sont donc réalisées par des fonctions classiques voir souvent déjà inclues dans le langage et ne serons pas décrites. 
+On a choisi ici de représenter les environnements de typage (classiques comme sans variances) par des listes associatives. Les fonctions de recherche, d'ajout ou de suppression d'un élément dans un environnement de typage sont ainsi réalisées par des fonctions classiques, souvent déjà inclues dans le langage, et ne seront pas décrites. 
 
 Les opérations $v \circ \Gamma$ et $\Gamma_1 \wedge \Gamma_2$ sont réalisées par les algorithmes \ref{algo:varRondEnvTypage} et \ref{algo:envTypInterEnvTyp}. A chaque fois, tout le traitement est fait par la fonction utilitaire, la fonction principale servant uniquement à initialiser les paramètres qui jouent le rôle d'accumulateurs dans la fonction utilitaire afin de faciliter l'emploi de la fonction de calcul par la suite. Dans les deux cas, on parcourt un environnement de typage en entier ($\Gamma$ et $\Gamma_1$) et on traite chaque élément l'un après l'autre. On utilise ici la récurrence car OCaml est un langage qui s'y prête bien mais on aurait aussi pu utiliser une boucle \texttt{for}.
 
-La fonction de typage est donnée par l'algorithme \ref{algo:typage}. Les objectifs de cette fonction sont : vérifier que la formule est bien conforme à la syntaxe et aux règles de typage du $\mu$-calcul d'ordre supérieur et de trouver la plus grande variance possible pour chaque variable libre de la formule $f$. Cette fonction applique directement les règles de typage de la section \ref{regles}. 
+La fonction de d'inférence de variances $type(.)$ est donnée par l'algorithme \ref{algo:typage}. Les objectifs de cette fonction sont de vérifier que la formule est bien conforme à la syntaxe et aux règles de typage du $\mu$-calcul d'ordre supérieur et de trouver la plus grande variance possible pour chaque variable libre de la formule $f$. Cette fonction applique directement les règles de d'inférence de variances de la section \ref{regles}. 
 
-Une autre fonction qui ne sert pas directement au typage mais qui permet d'identifier les variables libres d'une formule $f$ et compte leur nombre d'apparitions dans la formule est donnée par l'algorithme \ref{algo:varLibres}. C'est utile d'avoir la liste des variables libres pour rédiger le $\Delta$ nécessaire à la fonction de typage et pour vérifier que cette dernière a bien attribuer une variance à toutes les variables libres.
+Une autre fonction qui ne sert pas directement à l'inférence de variances mais qui permet d'identifier les variables libres d'une formule $f$ et de compter leur nombre d'apparitions dans la formule est donnée par l'algorithme \ref{algo:varLibres}. C'est utile d'avoir la liste des variables libres pour rédiger le $\Delta$ nécessaire à la fonction d'inférence de variances et pour vérifier que cette dernière a bien attribué une variance à toutes les variables libres.
 
 \begin{algorithm}[H]
   \begin{PseudoCode}
@@ -492,23 +653,23 @@ sinon :
 
 \begin{algorithm}[H]
   \begin{PseudoCode}
-$\textsc{Typage}$(formule $f$, environnement de typage sans variances $\Delta$) : 
+$\textsc{Type}$(formule $f$, environnement de typage sans variances $\Delta$) : 
       (environnement de typage, type) :
 cas $f$ avec :
     $\begin{array}{rl}
 		\top \ :&\text{\color{bleu}retourner } (\emptyset, \bullet);\\\\
-		\Phi \wedge \Psi \ :&(\Gamma_1, \tau_1) \leftarrow \textsc{Typage}(\Phi, \Delta);\\
+		\Phi \wedge \Psi \ :&(\Gamma_1, \tau_1) \leftarrow \textsc{Type}(\Phi, \Delta);\\
 		&\text{\color{bleu}si } (\tau_1 = \bullet) \ : \\
-		&\qquad (\Gamma_2, \tau_2) \leftarrow \textsc{Typage}(\Psi, \Delta);\\
+		&\qquad (\Gamma_2, \tau_2) \leftarrow \textsc{Type}(\Psi, \Delta);\\
 		&\qquad \text{ \color{bleu}si } (\tau_2 = \bullet) \ :\\
 		&\qquad \qquad \text{\color{bleu}retourner } (\Gamma_1 \wedge \Gamma_2, \bullet); \\
 		& \qquad \text{\color{bleu}sinon } : \\
 		&\qquad \qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} \Psi \text{ n'a pas le type } \bullet"}; \\
 		&\text{\color{bleu}sinon } : \\
 		&\qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} \Phi \text{ n'a pas le type } \bullet"}; \\\\
-		\neg\Phi \ :&(\Gamma, \tau) \leftarrow \textsc{Typage}(\Phi, \Delta);\\
+		\neg\Phi \ :&(\Gamma, \tau) \leftarrow \textsc{Type}(\Phi, \Delta);\\
 		&\qquad \text{\color{bleu}retourner } (\overline{\{\sqcap, \sqcup\}} \circ \Gamma, \tau); \\\\
-		\langle a \rangle \Phi \ :&(\Gamma, \tau) \leftarrow \textsc{Typage}(\Phi, \Delta);\\
+		\langle a \rangle \Phi \ :&(\Gamma, \tau) \leftarrow \textsc{Type}(\Phi, \Delta);\\
 		&\text{\color{bleu}si } (\tau = \bullet) \ : \\
 		&\qquad \text{\color{bleu}retourner } (\{\sqcup\} \circ \Gamma, \bullet); \\
 		&\text{\color{bleu}sinon } : \\
@@ -518,7 +679,7 @@ cas $f$ avec :
 		&\qquad \text{\color{bleu}retourner } (X^{\{\sqcap, \sqcup\}} : \tau, \tau); \\
 		&\text{\color{bleu}sinon } : \\
 		&\qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} X \text{ n'est pas dans } \Delta"}; \\\\
-		\mu X : \tau . \Phi \ :&(\Gamma, \sigma) \leftarrow \textsc{Typage}(\Phi, \Delta \cup \{X : \tau\});\\
+		\mu X : \tau . \Phi \ :&(\Gamma, \sigma) \leftarrow \textsc{Type}(\Phi, \Delta \cup \{X : \tau\});\\
 		&\text{\color{bleu}si } (\tau \neq \sigma) \ :\\
 		&\qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} \tau \text{ et } \sigma \text{ incompatibles}"};\\
 		&\text{\color{bleu}sinon } : \\
@@ -533,14 +694,17 @@ cas $f$ avec :
 		&\qquad \qquad \qquad \qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} v \text{ n'est pas une des variances suivantes : }none, \{\sqcap, \sqcup\}, \{\sqcap\}, \{\sqcup\} \text{ ou } \varnothing"};\\
 		&\qquad \qquad \qquad \text{\color{bleu}sinon } :\\
 		&\qquad \qquad \qquad \qquad \text{\color{bleu}retourner } (\Gamma \, \setminus \,\{X^{v} : \tau\}, \tau); \\\\
-		\lambda X^{v} : \tau . \Phi \ :&(\Gamma, \sigma) \leftarrow \textsc{Typage}(\Phi, \Delta \cup \{X : \tau\});\\
+		\lambda X^{v} : \tau . \Phi \ :&(\Gamma, \sigma) \leftarrow \textsc{Type}(\Phi, \Delta \cup \{X : \tau\});\\
 		&\text{\color{bleu}si } (X \notin vars(\Gamma)) \ :\\
 		&\qquad \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} X \text{ n'est pas dans } \Gamma"}; \\
 		&\text{\color{bleu}sinon } :\\
-		&\qquad (v, \sigma_2) \leftarrow (\text{variance de } X \text{ dans }\Gamma, \text{ type de } X \text{ dans }\Gamma);\\
-		&\qquad \text{\color{bleu}retourner } (\Gamma \, \setminus \,\{X^{v} : \sigma_2\},\  \sigma_2^v \rightarrow \sigma); \\\\
-		\Phi \Psi \ :&(\Gamma_1, \tau_1) \leftarrow \textsc{Typage}(\Phi, \Delta);\\
-		&(\Gamma_2, \tau_2) \leftarrow \textsc{Typage}(\Psi, \Delta);\\
+		&\qquad (v', \sigma_2) \leftarrow (\text{variance de } X \text{ dans }\Gamma, \text{ type de } X \text{ dans }\Gamma);\\
+		&\qquad \text{\color{bleu}si } (v \preccurlyeq v') \ :\\
+		&\qquad \qquad \text{\color{bleu}retourner } (\Gamma \, \setminus \,\{X^{v'} : \sigma_2\},\  \sigma_2^{v} \rightarrow \sigma); \\
+		&\qquad \text{\color{bleu}sinon } :\\
+		&\qquad \qquad \text{\color{bleu}afficher \color{red} "Erreur : contradiction dans la variance de } {\color{red} X"}; \\\\
+		\Phi \Psi \ :&(\Gamma_1, \tau_1) \leftarrow \textsc{Type}(\Phi, \Delta);\\
+		&(\Gamma_2, \tau_2) \leftarrow \textsc{Type}(\Psi, \Delta);\\
 		&\text{\color{bleu}cas } \tau_1 \ \text{\color{bleu}avec } :\\
 		&\qquad \qquad \quad \; \bullet \ : \ \ \text{\color{bleu}afficher \color{red} "Erreur : } {\color{red} \Phi \text{ n'est pas une fonction}"}; \\
 		&\qquad \sigma_1^v \rightarrow \sigma_2 \ : \ \ \text{\color{bleu}si } (\sigma_1 \neq \tau_2) \ :\\
@@ -552,7 +716,7 @@ cas $f$ avec :
 fin cas
   \end{PseudoCode}
   \caption[Algo en PseudoCode]{Effectue
-   le typage de la formule $f$.\label{algo:typage}}
+   l'inférence des variances de la formule $f$.\label{algo:typage}}
 \end{algorithm}
 
 \begin{algorithm}[H]
@@ -612,23 +776,112 @@ sinon :
 
 \section{Résultats}
 
-Faire un tableau avec les résultats de tests.
+Les tables suivantes, les tables \ref{table : résultats1} et \ref{table : résultats2} contiennent les résultats des tests effectués avec l'implémentation de $type(.)$. Ces tests comportent des cas de base, y compris des cas d'erreur pour vérifier le bon fonctionnement de chaque règle. Il y a aussi les formules des exemples \ref{exemple1}, \ref{exemple2} et \ref{exemple3} pour avoir quelques formules plus compliquées dont on connaît déjà le résultat. 
 
-Commenter les résultats, peut-être faire des arbres de typage pour certains.
+\begin{table}[H]
+    \center
+    \renewcommand{\arraystretch}{2}
+    \begin{tabular}[b]{|c|c||c|c|}
+    \hline
+  	{\huge{\textbf{$f$}}} & {\huge{\textbf{$\Delta$}}} & {\huge{\textbf{$\Gamma$}}} & {\huge{\textbf{$\tau$}}} \\ \hline
+  	\hline
+  	$\top$ & $\emptyset$ & $\emptyset$ & $\bullet$ \\
+  	\hline
+  	$X$ & $\{{\{X : \bullet\}}\}$ & $\{{\{X^{\{\sqcap, \sqcup\}} : \bullet\}}\}$ & $\bullet$ \\
+ 	\hline
+ 	$X$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $\{{\{X^{\{\sqcap, \sqcup\}} : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $(\bullet^{\varnothing} \rightarrow \bullet)$ \\
+ 	\hline
+ 	${\langle a \rangle X}$ & $\{{\{X : \bullet\}}\}$ & $\{{\{X^{\{\sqcup\}} : \bullet\}}\}$ & $\bullet$ \\
+ 	\hline
+ 	${\langle a \rangle X}$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & \multicolumn{2}{c|}{Erreur dans $\diamond$ : $X$ n'a pas le type $\bullet$!} \\
+ 	\hline
+ 	${X \wedge Y}$ & $\{{\{X : \bullet\}},$ & $\{{\{X^{\{\sqcap, \sqcup\}} : \bullet\}},$ & $\bullet$ \\
+ 	& ${\{Y : \bullet\}}\}$ & ${\{Y^{\{\sqcap, \sqcup\}} : \bullet\}}\}$ & \\
+ 	\hline
+ 	${X \wedge Y}$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}},$ & \multicolumn{2}{c|}{Erreur dans $\wedge$ : $X$ n'a pas le type $\bullet$!} \\
+ 	& ${\{Y : \bullet\}}\}$ & \multicolumn{2}{c|}{ } \\
+ 	\hline
+ 	${X \wedge Y}$ & $\{{\{X : \bullet\}},$ & \multicolumn{2}{c|}{Erreur dans $\wedge$ : $Y$ n'a pas le type $\bullet$!} \\
+ 	& ${\{Y : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & \multicolumn{2}{c|}{ } \\
+ 	\hline
+ 	${\neg X}$ & $\{{\{X : \bullet\}}\}$ & $\{{\{X^{\overline{\{\sqcap, \sqcup\}}} : \bullet\}}\}$ & $\bullet$ \\
+ 	\hline
+ 	${\neg X}$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $\{{\{X^{\overline{\{\sqcap, \sqcup\}}} : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $(\bullet^{\varnothing} \rightarrow \bullet)$ \\
+ 	\hline
+ 	$\mu X : \bullet \ . \ X$ & $\emptyset$ & $\emptyset$ & $\bullet$ \\
+  	\hline
+  	$\mu X : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ X$ & $\emptyset$ & $\emptyset$ & $(\bullet^{\overline{\varnothing}} \rightarrow \bullet)$ \\
+  	\hline
+ 	$\mu X : \bullet \ . \ \neg X$ & $\emptyset$ & \multicolumn{2}{c|}{Erreur dans $\mu$ : $X$ a la variance ${\overline{\{\sqcap, \sqcup\}}}$ qui n'est pas $\succcurlyeq \varnothing$!} \\
+ 	\hline
+ 	$\mu X : (\bullet^{\varnothing} \rightarrow \bullet) \ . \ \top$ & $\emptyset$ & \multicolumn{2}{c|}{Erreur dans $\mu$ : types incompatibles entre $X$ et $\top$!} \\
+ 	\hline
+ 	$\mu X : \bullet \ . \ X$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $\emptyset$ & $\bullet$ \\
+ 	\hline
+    \end{tabular}
+    \caption{Résultats des tests de la fonction $type(f, \ \Delta) = (\Gamma, \tau)$}
+    \label{table : résultats1}
+\end{table}
+
+\begin{table}[H]
+    \center
+    \renewcommand{\arraystretch}{2}
+    \begin{tabular}[b]{|c|c||c|c|}
+    \hline
+  	{\huge{\textbf{$f$}}} & {\huge{\textbf{$\Delta$}}} & {\huge{\textbf{$\Gamma$}}} & {\huge{\textbf{$\tau$}}} \\ \hline
+ 	\hline
+ 	$\lambda X^{\varnothing} : \bullet \ . \ X$ & $\emptyset$ & $\emptyset$ & $(\bullet^{\varnothing} \rightarrow \bullet)$ \\
+ 	\hline
+ 	$\lambda X^{any} : (\bullet^{\varnothing} \rightarrow \bullet) \ . \ X$ & $\emptyset$ & $\emptyset$ & $((\bullet^{\varnothing} \rightarrow \bullet)^{any} \rightarrow$ \\
+ 	& & & $(\bullet^{\varnothing} \rightarrow \bullet))$ \\
+ 	\hline
+ 	$\lambda X^{\overline{\{\sqcap\}}} : (\bullet^{\varnothing} \rightarrow \bullet) \ . \ X$ & $\emptyset$ & \multicolumn{2}{c|}{Erreur dans $\lambda$ : variances incompatibles pour $X$!} \\
+ 	\hline
+ 	$\lambda X^{\{\sqcup\}} : \bullet \ . \ X$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}\}$ & $\emptyset$ & $(\bullet^{\{\sqcup\}} \rightarrow \bullet)$ \\
+ 	\hline
+ 	$X Y$ & $\{{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\}}$ & $\{{\{X^{\{\sqcap, \sqcup\}} : (\bullet^{\varnothing} \rightarrow \bullet)\}},$ & $\bullet$ \\
+ 	& ${\{Y : \bullet\}}\}$ & ${\{Y^{\varnothing} : \bullet\}}\}$ & \\
+ 	\hline
+ 	& $\{\{X : ((\bullet^{\{\sqcup\}} \rightarrow \bullet)^{\varnothing}$ & $\{\{X^{\{\sqcap, \sqcup\}} : ((\bullet^{\{\sqcup\}} \rightarrow \bullet)^{\varnothing}$ & \\
+ 	$X Y$ & $ \rightarrow (\bullet^{\{\sqcap\}} \rightarrow \bullet)\}, $ & $\rightarrow (\bullet^{\{\sqcap\}} \rightarrow \bullet)\}, $ & $(\bullet^{\{\sqcap\}} \rightarrow \bullet)$ \\
+ 	& ${\{Y : (\bullet^{\{\sqcup\}} \rightarrow \bullet)\}}\}$ & ${\{Y^{\varnothing} : (\bullet^{\{\sqcup\}} \rightarrow \bullet)\}}\}$ & \\
+ 	\hline
+ 	$X Y$ & $\{\{X : \bullet\},$ & \multicolumn{2}{c|}{Erreur dans application :} \\
+ 	& $\{Y : \bullet\}\}$ & \multicolumn{2}{c|}{$X$ n'a pas le type $\rightarrow$!} \\
+ 	\hline
+ 	$X Y$ & $\{\{X : (\bullet^{\varnothing} \rightarrow \bullet)\},$ & \multicolumn{2}{c|}{Erreur dans application :} \\
+ 	& $\{Y : (\bullet^{\varnothing} \rightarrow \bullet)\}\}$ & \multicolumn{2}{c|}{types de $X$ et $Y$ incompatibles!} \\
+ 	\hline
+ 	$(\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ $ & $\{\{Y : \bullet\}\}$ & $\{\{Y^{any} : \bullet\}\}$ & $\bullet$ \\
+ 	$\langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y$ & & & \\
+ 	\hline
+ 	$(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X$ & $\{\{X : \bullet\}\}$ & \multicolumn{2}{c|}{Erreur dans $\wedge$ : $\lambda X^{\varnothing} : \bullet \ . \ X$ n'a pas le type $\bullet$!} \\
+ 	\hline
+ 	$\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X))$ & $\emptyset$ & \multicolumn{2}{c|}{Erreur dans $\mu$ : $X$ a la variance ${\overline{\varnothing}}$ qui n'est pas $\succcurlyeq \varnothing$!} \\
+ 	\hline
+ 	$(\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ $ & $\emptyset$ & $\emptyset$ & $(\bullet^{\overline{\varnothing}} \rightarrow \bullet)$ \\
+ 	$\lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X)) $ & & & \\
+ 	\hline
+ 	$\mu X : \bullet \ . \ [a]X$ & $\emptyset$ & $\emptyset$ & $\bullet$ \\
+ 	\hline
+    \end{tabular}
+    \caption{Suite des résultats des tests de la fonction $type(f, \ \Delta) = (\Gamma, \tau)$}
+    \label{table : résultats2}
+\end{table}
 
 \section{Conclusion}
 
-Dans ce TER nous nous somme basé sur un article, \citep{lange2014model} pour regarder une logique particulière, le $\mu$-calcul d'ordre supérieur et découvrir la notion de variance.
+Dans ce TER nous nous sommes basé sur un article, \citep{lange2014model} pour regarder une logique particulière, le $\mu$-calcul d'ordre supérieur et nous familiariser avec la notion de variance.
 
-Le but de ce TER était de typer le $\mu$-calcul polyadique d'ordre supérieur, mais en étudiant les règles de typage déjà existantes, nous avons remarqué que l'aspect polyadique de cette logique n'avait que peut d'impact sur le typage et nous avons donc par la suite choisi d'ignorer cet aspect dans la suite de ce TER. Une continuité possible à ce TER serait donc de réintégrer cet aspect polyadique à fin cette fois-ci de réellement typer le $\mu$-calcul polyadique d'ordre supérieur et non plus uniquement le $\mu$-calcul d'ordre supérieur, néanmoins cela ne semble pas être l'amélioration la plus importante qui puisse être apportée à ce travail. 
+Le but de ce TER a été de résoudre un sous-problème de l'inférence de types, l'inférence de variances. Pour ce faire, nous avons défini à l'aide de règles une fonction $type(.)$ qui prend en entrée une formule et un environnement de typage sans variances et rend le type de la formule et l'environnement de typage complété avec les variances. Nous avons aussi réalisé une implémentation de cette fonction en OCaml.
 
-En effet, dans la fonction de typage actuelle, afin de permettre l'utilisation de la récurrence, on a du imposer à l'utilisateur de connaître certaines informations qu'il pourrait ignorer en pratique. On lui demande en effet de connaître le type des variables libres, le type des variables liées étant obligatoirement spécifié par la syntaxe. De fait, on ne réalise pas vraiment un typage du $\mu$-calcul d'ordre supérieur mais plutôt une vérification de la compatibilité des types des variables qui permet de donner un type à la formule finale si aucune erreur n'est détectée. 
+ Toutefois, pour des raisons pratiques, les indications de variance présentes dans les types sont indiquées dans l'environnement de typage sans variances. Une première amélioration possible à ce TER, et sans doute la plus naturelle, serait d'enlever ces indictions de variances des types présents dans l'environnement de typage sans variances. Un outil pour le faire serait probablement la programmation par contrainte. 
 
-Néanmoins, le plus gênant avec la version actuelle ce n'est pas le fait de devoir connaître le type des variables libres, mais de devoir connaître les annotations de variances de ces derniers. De fait, une première amélioration à apporter à ce TER serait dans un premier temps, avant de chercher à supprimer complètement les informations de type des variables libres, uniquement de chercher à supprimer les informations de variance de ces types. Pour ce faire, il semble difficile de se passer de programmation par contraintes. 
+Dans un second temps, une autre ammélioration possible serait de s'attaquer cette fois-ci directement au problème de l'inférence de types. 
 
-Enfin, ce TER aura été l'occasion de mieux comprendre des notions vu en cours de théorie des types et de se rendre compte que l'on peut toujours affiner le typage d'une formule, par exemple ici avec des variances pour en déduire des propriétés sur cette formule comme par exemple la complexité de l'algorithme de model-checking capable de la traiter. Cela a été l'occasion aussi de se rendre compte que trouver un point fixe est une tâche qui peut se révéler compliquée en général. 
+Enfin, ce TER aura été l'occasion de mieux comprendre des notions vues en cours de théorie des types et de se rendre compte que l'on peut toujours affiner le typage d'une formule, par exemple ici avec des variances pour en déduire de nouvelles propriétés comme par exemple la complexité de l'algorithme de model-checking capable de traiter cette formule. Cela a été l'occasion aussi de comprendre que trouver un point fixe est une tâche qui peut se révéler compliquée en général. 
 
-Pour terminer, d'un point de vue plus pratique, ce TER aura aussi été l'occasion de découvrir un nouveau langage, OCaml et de nouvelles fonctionnalités de \LaTeX~.   
+Pour terminer, d'un point de vue plus pratique, ce TER m'a permis de découvrir un nouveau langage, OCaml, et de nouvelles fonctionnalités de \LaTeX~.   
 
 \bibliographystyle{apalike-fr}
 \bibliography{TerS3}
