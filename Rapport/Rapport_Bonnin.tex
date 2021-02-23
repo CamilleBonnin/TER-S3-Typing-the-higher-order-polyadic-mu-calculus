@@ -39,7 +39,7 @@
 
 \usepackage{natbib}
 
-\title{Typing the higher-order polyadic $\mu$-calculus}
+\title{Typing the higher-order $\mu$-calculus}
 \author{Camille Bonnin}
 \supervisor{Mme. Cinzia Di Giusto, M. Etienne Lozes}
 \date{Premier semestre de l'année 2020-2021}
@@ -80,7 +80,7 @@
 
 \section{Introduction\label{intro}}
 
-Le $\mu$-calcul a tout d'abord été introduit par Scott et de Bakker en 1969 \citep{scott1969theory}, mais a été étendu vers sa forme actuelle la plus utilisée de nos jours par Kozen en 1983 \citep{kozen1983results}. Par la suite, plusieurs extensions au 
+Le $\mu$-calcul est une logique modale qui a tout d'abord été introduite par Scott et de Bakker en 1969 \citep{scott1969theory}, mais qui a été étendue vers sa forme actuelle la plus utilisée de nos jours par Kozen en 1983 \citep{kozen1983results}. Par la suite, plusieurs extensions au 
 $\mu$-calcul ont été introduites dont le $\mu$-calcul polyadique, introduit par Andersen en 1994 \citep{andersen1994polyadic}, qui permet de manipuler des tuples d'états et le $\mu$-calcul d'ordre supérieur, introduit par Viswanathan et Viswanathan en 2004 \citep{viswanathan2004higher}, qui permet les opérations sur des formules et non plus uniquement sur des états simples. Le $\mu$-calcul polyadique d'ordre supérieur introduit par Lange, Lozes et Guzm{\'a}n en 2014 \citep{lange2014model} est une fusion de ces deux extensions.
 
 Le $\mu$-calcul polyadique d'ordre supérieur est une logique permettant d'exprimer une grande variété de formules. Il permet par exemple d'exprimer des relations sur les automates. Le $\mu$-calcul polyadique d'ordre supérieur possède aussi un opérateur de point fixe ce qui permet de formuler des propriétés représentant des suites infinies d'états. 
@@ -268,15 +268,15 @@ Les règles de typage qui permettent de dériver ${\Gamma : \Phi \vdash \tau}$ s
 Ces règles de typage permettent également de dire que certaines formules ne sont pas correctes à cause des variances, notamment la règle du $\mu$ qui indique que la variance $v$ de la variable liée par l'opérateur $\mu$ doit respecter $v \succcurlyeq \varnothing$.
 
 \begin{exem}\label{exemple2}
-En appliquant les règles de typage de l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model} sur les formules de l'exemple \ref{exemple1}, on obtient ce qui suit en terme de validité :
+En appliquant les règles de typage de l'article de Lange, Lozes et Guzm{\'a}n \citep{lange2014model} sur les formules de l'exemple \ref{exemple1}, on obtient ce qui suit en terme de typable ou non typable :
 \begin{itemize}
-	\item $(\lambda X^{v} : \bullet \ . \ X) \wedge X$ : non valide. 
-	\item $\mu X : \bullet \ . \  X$ : valide.
-	\item $\mu X : \bullet \ . \  \neg X$ : non valide.
-	\item $\mu X : \bullet \ . \  ((\lambda Y^{v} : \bullet \ . \ \neg Y)X)$ : non valide.
-	\item $\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \  \lambda X^{v} : \bullet \ . \ F (\neg (F X))$ : valide.
-	\item $(\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \ \lambda X^{v} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y$ : valide.
-	\item $\mu X : \bullet \ . \ [a]X$ : valide.
+	\item $(\lambda X^{v} : \bullet \ . \ X) \wedge X$ : non typable. 
+	\item $\mu X : \bullet \ . \  X$ : typable.
+	\item $\mu X : \bullet \ . \  \neg X$ : non typable.
+	\item $\mu X : \bullet \ . \  ((\lambda Y^{v} : \bullet \ . \ \neg Y)X)$ : non typable.
+	\item $\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \  \lambda X^{v} : \bullet \ . \ F (\neg (F X))$ : typable.
+	\item $(\mu F : (\bullet^{v'} \rightarrow \bullet) \ . \ \lambda X^{v} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y$ : typable.
+	\item $\mu X : \bullet \ . \ [a]X$ : typable.
 \end{itemize}
 \end{exem}
 
@@ -366,7 +366,7 @@ $ $
 \\
 $\inferrule
 {type(\Delta\cup\{X:\sigma\},\Phi)=(\Gamma,\tau) \\ \Gamma=\Gamma'\cup\{X^{v'}: \sigma'\} \\ v \preccurlyeq v'}
-{type(\Delta,\lambda X^{v} : \sigma \: . \: \Phi)= (\Gamma',\sigma'^{v} \rightarrow \tau)}(\textsc{T-lamdda})$
+{type(\Delta,\lambda X^{v} : \sigma \: . \: \Phi)= (\Gamma',\sigma'^{v} \rightarrow \tau)}(\textsc{T-lambda})$
 \\
 $ $
 \\
@@ -395,7 +395,7 @@ Donnons maintenant quelques explications à propos de ces règles d'inférence d
 \end{itemize}
 
 \begin{exem}\label{exemple3}
-Dans cet exemple, nous allons appliquer les règles ci-dessus aux formules de l'exemple \ref{exemple1} pour vérifier que l'on retrouve bien les validités de l'exemple \ref{exemple2}.\\
+Dans cet exemple, nous allons appliquer les règles ci-dessus aux formules de l'exemple \ref{exemple1} pour vérifier que l'on retrouve bien les résultats de l'exemple \ref{exemple2} sur le fait d'être typable ou non.\\
 
 $\ast$ Commençons par la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X}$ avec ${\Delta = \{\{X : \bullet\}\}}$. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}).
 
@@ -406,7 +406,7 @@ $\ast$ Commençons par la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) 
 {type(\Delta, (\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X)= \text{"Erreur : } \lambda X^{\varnothing} : \bullet \ . \ X \text{ n'a pas le type } \bullet \text{!"}}(\textsc{T-et})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X}$ n'est pas valide. \\
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${(\lambda X^{\varnothing} : \bullet \ . \ X) \wedge X}$ n'est pas typable. \\
 
 $\ast$ Continuons avec la formule ${\mu X : \bullet \ . \  X}$. On prend 
 ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
@@ -417,7 +417,7 @@ ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Del
 (\textsc{T-mu})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  X}$ est valide. \\
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  X}$ est typable. \\
 
 $\ast$ Poursuivons avec la formule ${\mu X : \bullet \ . \  \neg X}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
 
@@ -434,7 +434,7 @@ $\ast$ Poursuivons avec la formule ${\mu X : \bullet \ . \  \neg X}$. On prend $
 	(\textsc{T-mu})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  \neg X}$ n'est pas valide. \\
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  \neg X}$ n'est pas typable. \\
 
 $\ast$ Regardons maintenant la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X)}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta_{X} = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}) et ${\Delta_{X, Y} = \{\{X : \bullet\}, \{Y : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}). 
 
@@ -452,7 +452,7 @@ $\ast$ Regardons maintenant la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\ov
 (\textsc{T-mu})}(\textsc{T-app})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X))}$ n'est pas valide. \\
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \  ((\lambda Y^{\overline{\varnothing}} : \bullet \ . \ \neg Y)X))}$ n'est pas typable. \\
 
 $\ast$ Étudions ensuite la formule ${\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \  \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X))}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta_{F} = \{\{F : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}) et ${\Delta_{F, X} = \{\{F : \bullet^{\overline{\varnothing}} \rightarrow \bullet\}, \{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-lambda}). 
 
@@ -496,7 +496,7 @@ L'arbre de la formule est :
 (\textsc{T-mu})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X))}$ est valide. \\
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu F : (\bullet^{\overline{\varnothing}} \rightarrow \bullet) \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ F (\neg (F X))}$ est typable. \\
 
 $\ast$ On note ${\tau = \bullet^{\overline{\varnothing}} \rightarrow \bullet}$. On cherche ici à inférer les variances de la formule \\${(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X))))) \ [b] Y}$ à partir de ${\Delta = \{\{Y : \bullet\}\}}$.
 
@@ -562,7 +562,7 @@ On peut maintenant construire l'arbre de la formule entière :
 
 On rappelle pour la dernière ligne de l'arbre (3) que $[b] Y ::= \neg \langle b \rangle \neg Y$. On remarque aussi que l'on rajoute $F$ et $X$ à $\Delta$ pour les étages du dessus lorsqu'on les rencontre dans les opérateurs $\mu$ et $\lambda$ de la formule bien qu'elles n'étaient pas présentes en-dessous. 
 
-Dans la dernière ligne de l'arbre, on se retrouve dans les hypothèses (arbres (2) et (3)) avec $Y$ qui a deux variances différentes, $\{\sqcup\}$ et $\{\sqcap\}$, pour trouver la variance finale de $Y$, on commence par calculer $\overline{\varnothing} \circ \{\sqcap\} = \overline{\varnothing}$ pour suivre la règle \textsc{T-app} avant de chercher la plus grande variance $v$ telle que $v \preccurlyeq \{\sqcup\}$ et $v \preccurlyeq \overline{\varnothing}$, selon le treillis des variances (figure \ref{figure:treillis des variances}), cette variable est $any$ d'où le résultat. On retrouve bien le fait que la formule ${(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y}$ est valide.\\
+Dans la dernière ligne de l'arbre, on se retrouve dans les hypothèses (arbres (2) et (3)) avec $Y$ qui a deux variances différentes, $\{\sqcup\}$ et $\{\sqcap\}$, pour trouver la variance finale de $Y$, on commence par calculer $\overline{\varnothing} \circ \{\sqcap\} = \overline{\varnothing}$ pour suivre la règle \textsc{T-app} avant de chercher la plus grande variance $v$ telle que $v \preccurlyeq \{\sqcup\}$ et $v \preccurlyeq \overline{\varnothing}$, selon le treillis des variances (figure \ref{figure:treillis des variances}), cette variable est $any$ d'où le résultat. On retrouve bien le fait que la formule ${(\mu F : \tau \ . \ \lambda X^{\overline{\varnothing}} : \bullet \ . \ \langle a \rangle (Y \wedge (F \neg(F X)))) \ [b] Y}$ est typable.\\
 
 $\ast$ Pour terminer, regardons la formule ${\mu X : \bullet \ . \ [a]X}$. On prend ${\Delta = \emptyset}$ puisqu'il n'y a pas de variable libre. On va noter ${\Delta' = \{\{X : \bullet\}\}}$ l'environnement de typage sans variable créé par la règle (\textsc{T-mu}).
 
@@ -585,7 +585,7 @@ $\ast$ Pour terminer, regardons la formule ${\mu X : \bullet \ . \ [a]X}$. On pr
 	(\textsc{T-mu})
 \]
 
-On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \ [a]X}$ est valide.
+On retrouve bien le résultat de l'exemple \ref{exemple2}, la formule ${\mu X : \bullet \ . \ [a]X}$ est typable.
 \end{exem}
 
 \section{Implémentation des règles de typage\label{algos}}
